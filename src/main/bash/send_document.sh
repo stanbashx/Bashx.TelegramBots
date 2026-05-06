@@ -13,6 +13,9 @@ for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
   echo "Argument \"$ARGUMENT\" is empty!"; exit $((100+INDEX)); fi
 done
 
+if [[ ! "${TG_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
+ echo 'Wrong chat id!'; exit 1; fi
+
 if [[ ! -f "${TG_FILEPATH}" ]]; then
  echo "No file \"${TG_FILEPATH}\"!"; exit 1
 elif [[ ! -s "${TG_FILEPATH}" ]]; then
