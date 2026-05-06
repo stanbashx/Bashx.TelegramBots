@@ -19,11 +19,13 @@ elif [[ ! -s "${TG_FILEPATH}" ]]; then
  echo "File \"${TG_FILEPATH}\" is empty!"; exit 1
 fi
 
+# https://core.telegram.org/bots/api#senddocument
+
 CODE=$(curl -m 8 -w %{http_code} -o /dev/null \
- --form "document=@\"${TG_FILEPATH}\"" \
- --form "chat_id=\"${TG_CHAT_ID}\"" \
- --form "caption=\"${TG_MESSAGE}\"" \
- --form "parse_mode=\"markdown\"" \
+ --form "document=@${TG_FILEPATH}" \
+ --form-string "chat_id=${TG_CHAT_ID}" \
+ --form-string "caption=${TG_MESSAGE}" \
+ --form-string 'parse_mode=Markdown' \
  "https://api.telegram.org/bot${TG_BOT_ID}:${TG_BOT_TOKEN}/sendDocument")
 
 if test $? -ne 0; then
