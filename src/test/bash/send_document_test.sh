@@ -29,3 +29,7 @@ ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 ${ISSUER} '' '')"
 ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 TG_CHAT_ID=0 ${ISSUER} '' '')"
 . $asserts/ne.sh $? 0
 . $asserts/eq.sh "${ACTUAL_VALUE}" 'Argument "TG_MESSAGE" is empty!'
+
+ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 TG_CHAT_ID=0 ${ISSUER} 0 '')"
+. $asserts/ne.sh $? 0
+. $asserts/eq.sh "${ACTUAL_VALUE}" 'Argument "TG_FILEPATH" is empty!'
