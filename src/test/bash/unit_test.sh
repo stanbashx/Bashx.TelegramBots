@@ -7,6 +7,7 @@ tgbots="src/main/bash"
 . $tests/readme_test.sh
 . $tests/license_test.sh
 . $tests/get_me_test.sh
+. $tests/get_updates_test.sh
 . $tests/send_document_test.sh
 . $tests/send_message_test.sh
 

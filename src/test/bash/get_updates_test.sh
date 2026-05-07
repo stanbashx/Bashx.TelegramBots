@@ -1,6 +1,6 @@
 #!/usr/local/bin/bash
 
-ISSUER="$tgbots/get_me.sh"
+ISSUER="$tgbots/get_updates.sh"
 
 ACTUAL_VALUE="$(${ISSUER})"
 . $asserts/ne.sh $? 0

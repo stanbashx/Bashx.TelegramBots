@@ -4,9 +4,9 @@ if test $# -ne 2; then
  echo 'Wrong arguments!'; exit 1; fi
 
 TG_MESSAGE="$1"
-TG_FILEPATH="$2"
+TG_INPUT="$2"
 
-ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_CHAT_ID TG_MESSAGE TG_FILEPATH)
+ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_CHAT_ID TG_MESSAGE TG_INPUT)
 for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
  ARGUMENT="${ARGUMENTS[INDEX]}"
  if test -z "${!ARGUMENT}"; then
@@ -16,16 +16,16 @@ done
 if [[ ! "${TG_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
  echo 'Wrong chat id!'; exit 1; fi
 
-if [[ ! -f "${TG_FILEPATH}" ]]; then
- echo "No file \"${TG_FILEPATH}\"!"; exit 1
-elif [[ ! -s "${TG_FILEPATH}" ]]; then
- echo "File \"${TG_FILEPATH}\" is empty!"; exit 1
+if [[ ! -f "${TG_INPUT}" ]]; then
+ echo "No file \"${TG_INPUT}\"!"; exit 1
+elif [[ ! -s "${TG_INPUT}" ]]; then
+ echo "File \"${TG_INPUT}\" is empty!"; exit 1
 fi
 
 # https://core.telegram.org/bots/api#senddocument
 
 CODE=$(curl -m 8 -w %{http_code} -o /dev/null \
- --form "document=@${TG_FILEPATH}" \
+ --form "document=@${TG_INPUT}" \
  --form-string "chat_id=${TG_CHAT_ID}" \
  --form-string "caption=${TG_MESSAGE}" \
  --form-string 'parse_mode=Markdown' \
