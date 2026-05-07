@@ -17,6 +17,9 @@ done
 if [[ ! "${TG_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
  echo 'Wrong chat id!'; exit 1; fi
 
+if (( ${#TG_TOPIC_NAME} > 128 )); then
+ echo 'Wrong topic name!'; exit 1; fi
+
 if test -f "${TG_OUTPUT}"; then
  echo "File \"${TG_OUTPUT}\" exists!"; exit 1; fi
 

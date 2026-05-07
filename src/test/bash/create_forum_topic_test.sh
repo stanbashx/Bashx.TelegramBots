@@ -41,3 +41,7 @@ ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 ${ISSUER} 0 0 '')"
 ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 ${ISSUER} x 0 0)"
 . $asserts/ne.sh $? 0
 . $asserts/eq.sh "${ACTUAL_VALUE}" 'Wrong chat id!'
+
+ACTUAL_VALUE="$(TG_BOT_ID=0 TG_BOT_TOKEN=0 ${ISSUER} 0 abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789a 0)"
+. $asserts/ne.sh $? 0
+. $asserts/eq.sh "${ACTUAL_VALUE}" 'Wrong topic name!'

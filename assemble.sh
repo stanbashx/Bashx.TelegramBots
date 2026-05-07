@@ -19,4 +19,4 @@ if [[ ! -s 'README.md' ]]; then
 
 mkdir -p 'build/zip'
 ISSUER="build/zip/${REP_NAME}-${VERSION}.zip"
-zip -r "${ISSUER}" 'src/main/bash' 'LICENSE' 'README.md'
+zip -r "${ISSUER}" 'src/main/bash' 'src/main/res' 'LICENSE' 'README.md'
