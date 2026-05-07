@@ -1,10 +1,11 @@
 #!/usr/local/bin/bash
 
-if test $# -ne 2; then
+if test $# -ne 3; then
  echo 'Wrong arguments!'; exit 1; fi
 
-TG_TOPIC_ID="$1"
-TG_EMOJI_ID="$2"
+TG_CHAT_ID="$1"
+TG_TOPIC_ID="$2"
+TG_EMOJI_ID="$3"
 
 ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_CHAT_ID TG_TOPIC_ID TG_EMOJI_ID)
 for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
@@ -16,7 +17,7 @@ done
 if [[ ! "${TG_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
  echo 'Wrong chat id!'; exit 1; fi
 
-if [[ ! "${TG_TOPIC_ID}" =~ ^[0-9]+$ ]]; then
+if [[ ! "${TG_TOPIC_ID}" =~ ^[1-9][0-9]?$ ]]; then
  echo 'Wrong topic id!'; exit 1; fi
 
 REQUEST_BODY="{
@@ -26,8 +27,6 @@ REQUEST_BODY="{
 
 REQUEST_BODY="$(echo "${REQUEST_BODY}" | TG_EMOJI_ID="${TG_EMOJI_ID}" yq -M -o=json '.icon_custom_emoji_id=strenv(TG_EMOJI_ID)')"
 if test $? -ne 0; then echo 'Request body error!'; exit 1; fi
-
-echo 'Not implemented!'; exit 1 # todo
 
 # https://core.telegram.org/bots/api#editforumtopic
 
