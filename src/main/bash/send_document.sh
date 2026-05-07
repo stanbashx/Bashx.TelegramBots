@@ -1,10 +1,11 @@
 #!/usr/local/bin/bash
 
-if test $# -ne 2; then
+if test $# -ne 3; then
  echo 'Wrong arguments!'; exit 1; fi
 
-TG_MESSAGE="$1"
-TG_INPUT="$2"
+TG_CHAT_ID="$1"
+TG_MESSAGE="$2"
+TG_INPUT="$3"
 
 ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_CHAT_ID TG_MESSAGE TG_INPUT)
 for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
