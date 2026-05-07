@@ -1,10 +1,11 @@
 #!/usr/local/bin/bash
 
-if test $# -ne 2; then
+if test $# -ne 3; then
  echo 'Wrong arguments!'; exit 1; fi
 
-TG_TOPIC_NAME="$1"
-TG_OUTPUT="$2"
+TG_CHAT_ID="$1"
+TG_TOPIC_NAME="$2"
+TG_OUTPUT="$3"
 
 ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_CHAT_ID TG_TOPIC_NAME TG_OUTPUT)
 for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
@@ -45,4 +46,10 @@ elif [[ ! -s "${TG_OUTPUT}" ]]; then
  echo "File \"${TG_OUTPUT}\" is empty!"; exit 1
 fi
 
-echo 'Not implemented!'; exit 1 # todo
+TG_CHECKS="$(yq -e '.ok // false' "${TG_OUTPUT}" 2>/dev/null)"
+
+if test $? -ne 0; then
+ echo 'Parse error!'; exit 1; fi
+
+if [[ "${TG_CHECKS}" != 'true' ]]; then
+ echo 'Check error!'; exit 1; fi
