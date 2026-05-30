@@ -11,8 +11,10 @@ TESTS='src/test/bash'
 # todo unit_test.sh -> check_tests.sh
 
 while IFS= read -r -d '' TEST_PATH; do
- if [[ "${TEST_PATH}" == "${TESTS}/unit_test.sh" || "${TEST_PATH}" =~ ^${TESTS}/check_.+\.sh$ ]]; then
-  continue
+ if [[ "${TEST_PATH}" == "${TESTS}/unit_test.sh" \
+  || "${TEST_PATH}" =~ ^${TESTS}/check_.+\.sh$ \
+  || "${TEST_PATH}" =~ ^${TESTS}/mocks/.+$ \
+  ]]; then continue
  elif [[ -L "${TEST_PATH}" || ! -f "${TEST_PATH}" \
   || ! -s "${TEST_PATH}" || ! -x "${TEST_PATH}" \
   || ! "${TEST_PATH}" =~ ^${TESTS}/.+_test\.sh$ \
