@@ -11,72 +11,73 @@ if ! bash -n "${SCRIPT}"; then
 
 STDERR="$(mktemp)"
 
-"${SCRIPT}" 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" '' '' '' '' '' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" '' '' '' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" '' '' '' '' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" '' '' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" '"TGBOTS_BOT_ID" is empty!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" 'a' '' '' '' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" 'a' '' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" '"TGBOTS_BOT_TOKEN" is empty!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" 'a' 'b' '' '' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" 'a' 'b' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" '"TGBOTS_CHAT_ID" is empty!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" 'a' 'b' 'c' '' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" 'a' 'b' 'c' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" '"TGBOTS_MESSAGE" is empty!'
 
 :> "${STDERR}"
 
-"${SCRIPT}" 'a' 'b' 'c' 'd' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+"${SCRIPT}" 'a' 'b' 'c' 'd' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong chat id!'
 
 :> "${STDERR}"
 
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_EXIT_CODE=1 \
- "${SCRIPT}" 'a' 'b' '1' 'd' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+ "${SCRIPT}" 'a' 'b' '1' 'd' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Curl error!'
 
 :> "${STDERR}"
 
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_CODE=500 \
- "${SCRIPT}" 'a' 'b' '1' 'd' 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '1'
+ "${SCRIPT}" 'a' 'b' '1' 'd' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Send tg message error!'
 
 :> "${STDERR}"
 
-TGBOTS_CHAT_ID=1
-TGBOTS_MESSAGE='d'
+MOCKS_CURL_DATA_PATH="$(mktemp)"
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_CODE=200 \
- "${SCRIPT}" 'a' 'b' "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" 2>"${STDERR}"; CODE=$?
-. $asserts/strings/eq.sh "${SCRIPT}" "${CODE}" '0'
+ MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
+ "${SCRIPT}" 'a' 'b' '1' 'd' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id 'build/tests/mocks_curl_data')" "${TGBOTS_CHAT_ID}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text 'build/tests/mocks_curl_data')" "${TGBOTS_MESSAGE}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" 'd'
+rm "${MOCKS_CURL_DATA_PATH}"
 
 rm "${STDERR}"

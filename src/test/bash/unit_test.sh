@@ -3,9 +3,6 @@
 if [[ ! -d "${asserts}" ]]; then
  echo 'No asserts!'; exit 1; fi
 
-rm -rf 'build/tests'
-mkdir -p 'build/tests'
-
 TESTS='src/test/bash'
 
 # todo unit_test.sh -> check_tests.sh
@@ -18,7 +15,7 @@ while IFS= read -r -d '' TEST_PATH; do
  elif [[ -L "${TEST_PATH}" || ! -f "${TEST_PATH}" \
   || ! -s "${TEST_PATH}" || ! -x "${TEST_PATH}" \
   || ! "${TEST_PATH}" =~ ^${TESTS}/.+_test\.sh$ \
- ]] || ! bash -n "${TEST_PATH}"; then
+  ]] || ! bash -n "${TEST_PATH}"; then
   echo "\"${TEST_PATH}\" is not supported!" >&2; exit 1
  fi
  "${TEST_PATH}" || exit 1

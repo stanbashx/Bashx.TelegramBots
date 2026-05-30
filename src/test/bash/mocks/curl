@@ -9,8 +9,8 @@ while [[ $# -gt 0 ]]; do
  esac
 done
 
-if [[ -n "${MOCKS_CURL_DATA}" ]]; then
- printf '%s' "${MOCKS_CURL_DATA}" > 'build/tests/mocks_curl_data'; fi
+if [[ -n "${MOCKS_CURL_DATA}" && -n "${MOCKS_CURL_DATA_PATH}" ]]; then
+ printf '%s' "${MOCKS_CURL_DATA}" > "${MOCKS_CURL_DATA_PATH}" || exit 1; fi
 
 if [[ "${MOCKS_CURL_OUTPUT_FORMAT}" == '%{http_code}' ]]; then
  printf '%s' "${MOCKS_CURL_CODE}"; fi
