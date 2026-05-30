@@ -18,17 +18,11 @@ done
 if [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
  echo 'Wrong chat id!' >&2; exit 1; fi
 
-TGBOTS_PARSE_MODE='Markdown'
+TGBOTS_REQUEST_BODY="{
+\"chat_id\":${TGBOTS_CHAT_ID},
+\"parse_mode\":\"Markdown\",
+\"link_preview_options\":{\"is_disabled\":true}}"
 
-TGBOTS_REQUEST_BODY='{}'
-
-TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
- STR_VALUE="${TGBOTS_PARSE_MODE}" \
- yq -Me -p=json -o=json '.parse_mode=strenv(STR_VALUE)')" || exit 1
-TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
- yq -Me -p=json -o=json '.link_preview_options.is_disabled=true')" || exit 1
-TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
- yq -Me -p=json -o=json ".chat_id=${TGBOTS_CHAT_ID}")" || exit 1
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
  yq -Me -p=json -o=json '.text=strenv(STR_VALUE)')" || exit 1
