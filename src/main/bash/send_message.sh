@@ -20,31 +20,30 @@ if [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
 
 TGBOTS_PARSE_MODE='Markdown'
 
-REQUEST_BODY='{}'
+TGBOTS_REQUEST_BODY='{}'
 
-REQUEST_BODY="$(printf '%s' "${REQUEST_BODY}" | \
+TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_PARSE_MODE}" \
  yq -Me -p=json -o=json '.parse_mode=strenv(STR_VALUE)')" || exit 1
-REQUEST_BODY="$(printf '%s' "${REQUEST_BODY}" | \
+TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  yq -Me -p=json -o=json '.link_preview_options.is_disabled=true')" || exit 1
-REQUEST_BODY="$(printf '%s' "${REQUEST_BODY}" | \
+TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  yq -Me -p=json -o=json ".chat_id=${TGBOTS_CHAT_ID}")" || exit 1
-REQUEST_BODY="$(printf '%s' "${REQUEST_BODY}" | \
+TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
  yq -Me -p=json -o=json '.text=strenv(STR_VALUE)')" || exit 1
 
-echo "${REQUEST_BODY}" | yq
-
-echo 'Not implemented!'; exit 1 # todo
-
 TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_TOKEN}"
+
+echo 'Not implemented!' >&2; exit 1 # todo
 
 # https://core.telegram.org/bots/api#sendmessage
 
-CODE=$(curl -m 8 -w %{http_code} -o /dev/null \
+CODE=$(curl -m 8 -w '%{http_code}' -o /dev/null \
  "${TGBOTS_URL}/sendMessage" \
  -H 'Content-Type: application/json' \
- --data "${REQUEST_BODY}")
+ --data "${TGBOTS_REQUEST_BODY}" \
+ 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
  echo 'Curl error!'; exit 1
