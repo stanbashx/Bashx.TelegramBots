@@ -1,15 +1,19 @@
 #!/usr/local/bin/bash
 
-mkdir -p 'build'
+REP_OWNER='StanleyProjects'
+REP_NAME='TelegramBots'
+VERSION='0.0.7'
+
+if [[ -d 'build' ]]; then
+ echo 'Build dir exists!'; exit 1; fi
+
+mkdir 'build'
 mkdir -p 'build/yml'
 ISSUER='build/yml/metadata.yml'
 echo "repository:
- owner: 'StanleyProjects'
- name: 'TelegramBots'
-version: '0.0.7'" > "${ISSUER}"
-
-VERSION="$(yq -erM .version "${ISSUER}")" || exit 1
-REP_NAME="$(yq -erM .repository.name "${ISSUER}")" || exit 1
+ owner: '${REP_OWNER}'
+ name: '${REP_NAME}'
+version: '${VERSION}'" > "${ISSUER}"
 
 if [[ ! -s 'LICENSE' ]]; then
  echo 'No license!'; exit 1; fi
@@ -20,3 +24,5 @@ if [[ ! -s 'README.md' ]]; then
 mkdir -p 'build/zip'
 ISSUER="build/zip/${REP_NAME}-${VERSION}.zip"
 zip -r "${ISSUER}" 'src/main/bash' 'src/main/res' 'LICENSE' 'README.md'
+if [[ $? -ne 0 ]]; then
+ echo 'Zip error!'; exit 1; fi
