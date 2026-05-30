@@ -3,6 +3,9 @@
 if [[ ! -d "${asserts}" ]]; then
  echo 'No asserts!'; exit 1; fi
 
+rm -rf 'build/tests'
+mkdir -p 'build/tests'
+
 TESTS='src/test/bash'
 
 # todo unit_test.sh -> check_tests.sh

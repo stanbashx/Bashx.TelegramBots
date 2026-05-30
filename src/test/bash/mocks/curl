@@ -1,0 +1,19 @@
+#!/usr/local/bin/bash
+
+while [[ $# -gt 0 ]]; do
+ case "$1" in
+  -o) MOCKS_CURL_OUTPUT="$2"; shift 2;;
+  -w) MOCKS_CURL_OUTPUT_FORMAT="$2"; shift 2;;
+  --data) MOCKS_CURL_DATA="$2"; shift 2;;
+  *) shift;;
+ esac
+done
+
+if [[ -n "${MOCKS_CURL_DATA}" ]]; then
+ printf '%s' "${MOCKS_CURL_DATA}" > 'build/tests/mocks_curl_data'; fi
+
+if [[ "${MOCKS_CURL_OUTPUT_FORMAT}" == '%{http_code}' ]]; then
+ printf '%s' "${MOCKS_CURL_CODE}"; fi
+
+if [[ "${MOCKS_CURL_EXIT_CODE}" =~ ^[1-9][0-9]*$ ]]; then
+ exit ${MOCKS_CURL_EXIT_CODE}; fi

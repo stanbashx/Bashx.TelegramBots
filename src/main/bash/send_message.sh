@@ -35,8 +35,6 @@ TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
 
 TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_TOKEN}"
 
-echo 'Not implemented!' >&2; exit 1 # todo
-
 # https://core.telegram.org/bots/api#sendmessage
 
 CODE=$(curl -m 8 -w '%{http_code}' -o /dev/null \
@@ -46,7 +44,7 @@ CODE=$(curl -m 8 -w '%{http_code}' -o /dev/null \
  2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
- echo 'Curl error!'; exit 1
+ echo 'Curl error!' >&2; exit 1
 elif [[ "${CODE}" != '200' ]]; then
- echo 'Send tg message error!'; exit 1
+ echo 'Send tg message error!' >&2; exit 1
 fi
