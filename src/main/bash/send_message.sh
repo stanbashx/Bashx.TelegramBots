@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
 if [[ $# -ne 4 ]]; then
- echo 'Wrong arguments!'; exit 1; fi
+ echo 'Wrong arguments!' >&2; exit 1; fi
 
 TGBOTS_BOT_ID="$1"
 TGBOTS_BOT_TOKEN="$2"
@@ -12,11 +12,11 @@ args=(TGBOTS_BOT_ID TGBOTS_BOT_TOKEN TGBOTS_CHAT_ID TGBOTS_MESSAGE)
 for ((i=0; i<${#args[@]}; i++ )); do
  arg="${args[i]}"
  if [[ -z "${!arg}" ]]; then
-  echo "\"${arg}\" is empty!"; exit 1; fi
+  echo "\"${arg}\" is empty!" >&2; exit 1; fi
 done
 
 if [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
- echo 'Wrong chat id!'; exit 1; fi
+ echo 'Wrong chat id!' >&2; exit 1; fi
 
 TGBOTS_PARSE_MODE='Markdown'
 
