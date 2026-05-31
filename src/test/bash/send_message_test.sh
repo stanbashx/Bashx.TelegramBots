@@ -17,6 +17,12 @@ STDERR="$(mktemp)"
 
 :> "${STDERR}"
 
+"${SCRIPT}" '' '' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
+
+:> "${STDERR}"
+
 "${SCRIPT}" '' '' '' '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
@@ -117,49 +123,58 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Request error!'
 
+HTTP_CODES=(2 20 22 202 2000 401 403 429 500 '' 'foo')
+for HTTP_CODE in "${HTTP_CODES[@]}"; do
+ :> "${STDERR}"
+ PATH="src/test/bash/mocks:${PATH}" \
+  MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Send tg message error!'
+done
+
 :> "${STDERR}"
 
 PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_CODE=500 \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT='' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Send tg message error!'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" does not exist!"
+
+:> "${STDERR}"
+
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT='foo' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse output error!'
+rm "${TGBOTS_OUTPUT}"
+
+:> "${STDERR}"
+
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT='{"ok":false}' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
+rm "${TGBOTS_OUTPUT}"
 
 MOCKS_CURL_DATA_PATH="$(mktemp)"
 
 :> "${STDERR}"
 
 PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_CODE=200 \
- MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
- MOCKS_CURL_OUTPUT='foo' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse output error!'
-rm "${MOCKS_CURL_DATA_PATH}"
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_CODE=200 \
- MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
- MOCKS_CURL_OUTPUT='{"ok":false}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
-rm "${MOCKS_CURL_DATA_PATH}"
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_CODE=200 \
+ MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
  MOCKS_CURL_OUTPUT='{"ok":true}' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
+. $asserts/files/not_empty.sh "${TGBOTS_OUTPUT}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_OUTPUT}")" '{"ok":true}'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
 rm "${MOCKS_CURL_DATA_PATH}"

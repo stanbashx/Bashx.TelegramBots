@@ -16,7 +16,7 @@ if [[ -n "${MOCKS_CURL_OUTPUT}" && -n "${MOCKS_CURL_OUTPUT_PATH}" ]]; then
  printf '%s' "${MOCKS_CURL_OUTPUT}" > "${MOCKS_CURL_OUTPUT_PATH}" || exit 1; fi
 
 if [[ "${MOCKS_CURL_OUTPUT_FORMAT}" == '%{http_code}' ]]; then
- printf '%s' "${MOCKS_CURL_CODE}"; fi
+ printf '%s' "${MOCKS_CURL_HTTP_CODE}"; fi
 
 if [[ "${MOCKS_CURL_EXIT_CODE}" =~ ^[1-9][0-9]*$ ]]; then
  exit ${MOCKS_CURL_EXIT_CODE}; fi

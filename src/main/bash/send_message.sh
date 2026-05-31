@@ -52,7 +52,7 @@ TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
 # https://core.telegram.org/bots/api#sendmessage
 
-CODE=$(curl -m 8 -w '%{http_code}' \
+HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  "${TGBOTS_URL}/sendMessage" \
  -H 'Content-Type: application/json' \
  --data "${TGBOTS_REQUEST_BODY}" \
@@ -60,7 +60,7 @@ CODE=$(curl -m 8 -w '%{http_code}' \
 
 if [[ $? -ne 0 ]]; then
  echo 'Request error!' >&2; exit 1
-elif [[ "${CODE}" != '200' ]]; then
+elif [[ "${HTTP_CODE}" != '200' ]]; then
  echo 'Send tg message error!' >&2; exit 1
 fi
 
