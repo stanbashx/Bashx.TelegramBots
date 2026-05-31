@@ -33,7 +33,7 @@ STDERR="$(mktemp)"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot id!'
 
-TGBOTS_BOT_IDS=('a' '1234567' '12345678901234567' '01234567' '0123456a')
+TGBOTS_BOT_IDS=('a' '1234567' '12345678901234567' '01234567' '123456a')
 for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" '' '' '' '' 2>"${STDERR}"
@@ -41,10 +41,14 @@ for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  . $asserts/strings/eq.sh "Check bot id(${#TGBOTS_BOT_ID}) \"${TGBOTS_BOT_ID}\"" "$(<"${STDERR}")" 'Wrong bot id!'
 done
 
-TGBOTS_BOT_ID="$(printf '%.1s' {1..16})"
-
+TGBOTS_BOT_ID='1234567890123456'
 :> "${STDERR}"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" '' '' '' '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot secret!'
 
+TGBOTS_BOT_ID='12345678'
+:> "${STDERR}"
 "${SCRIPT}" "${TGBOTS_BOT_ID}" '' '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot secret!'
@@ -70,7 +74,7 @@ for TGBOTS_CHAT_ID in "${TGBOTS_CHAT_IDS[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" '' '' 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_BOT_ID}) \"${TGBOTS_BOT_ID}\"" "$(<"${STDERR}")" 'Wrong chat id!'
+ . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_CHAT_ID}) \"${TGBOTS_CHAT_ID}\"" "$(<"${STDERR}")" 'Wrong chat id!'
 done
 
 TGBOTS_CHAT_ID=1
