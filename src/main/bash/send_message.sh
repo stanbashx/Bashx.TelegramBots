@@ -8,15 +8,15 @@ TGBOTS_BOT_TOKEN="$2"
 TGBOTS_CHAT_ID="$3"
 TGBOTS_MESSAGE="$4"
 
-args=(TGBOTS_BOT_ID TGBOTS_BOT_TOKEN TGBOTS_CHAT_ID TGBOTS_MESSAGE)
-for ((i=0; i<${#args[@]}; i++ )); do
- arg="${args[i]}"
- if [[ -z "${!arg}" ]]; then
-  echo "\"${arg}\" is empty!" >&2; exit 1; fi
-done
-
-if [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[0-9]+$ ]]; then
- echo 'Wrong chat id!' >&2; exit 1; fi
+if [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
+ echo 'Wrong bot id!' >&2; exit 1
+elif [[ ! "${TGBOTS_BOT_TOKEN}" =~ ^AA[a-zA-Z0-9_-]{33}$ ]]; then
+ echo 'Wrong bot token!' >&2; exit 1
+elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
+ echo 'Wrong chat id!' >&2; exit 1
+elif [[ -z "${TGBOTS_MESSAGE}" || "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
+ echo 'Wrong message size!' >&2; exit 1
+fi
 
 TGBOTS_REQUEST_BODY="{
 \"chat_id\":${TGBOTS_CHAT_ID},
