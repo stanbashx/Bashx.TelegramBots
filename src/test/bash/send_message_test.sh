@@ -33,13 +33,15 @@ STDERR="$(mktemp)"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot id!'
 
-:> "${STDERR}"
+TGBOTS_BOT_IDS=('a' "$(printf '%.1s' {1..7})" "$(printf '%.1s' {1..17})")
+for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
+ :> "${STDERR}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" '' '' '' '' 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "Check bot id(${#TGBOTS_BOT_ID}) \"${TGBOTS_BOT_ID}\"" "$(<"${STDERR}")" 'Wrong bot id!'
+done
 
-"${SCRIPT}" 'a' '' '' '' '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong bot id!'
-
-TGBOTS_BOT_ID='10000000'
+TGBOTS_BOT_ID="$(printf '%.1s' {1..16})"
 
 :> "${STDERR}"
 
@@ -47,13 +49,15 @@ TGBOTS_BOT_ID='10000000'
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot secret!'
 
-:> "${STDERR}"
+TGBOTS_BOT_SECRETS=('a' "$(printf '%.1s' {1..34})" "$(printf '%.1s' {1..36})")
+for TGBOTS_BOT_SECRET in "${TGBOTS_BOT_SECRETS[@]}"; do
+ :> "${STDERR}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" '' '' '' 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "Check bot secret(${#TGBOTS_BOT_SECRET}) \"${TGBOTS_BOT_SECRET}\"" "$(<"${STDERR}")" 'Wrong bot secret!'
+done
 
-"${SCRIPT}" "${TGBOTS_BOT_ID}" 'a' '' '' '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong bot secret!'
-
-TGBOTS_BOT_SECRET='123456789012345678901234567890abcde'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 
 :> "${STDERR}"
 
@@ -77,7 +81,7 @@ TGBOTS_CHAT_ID=1
 
 :> "${STDERR}"
 
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "$(printf '%.1s' {0..4096})" '' 2>"${STDERR}"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "$(printf '%.1s' {1..4097})" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong message size!'
 
