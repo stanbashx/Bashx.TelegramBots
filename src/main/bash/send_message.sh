@@ -15,7 +15,7 @@ elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
  echo 'Wrong bot id!' >&2; exit 1
 elif [[ -z "${TGBOTS_BOT_SECRET}" ]]; then
  echo 'No bot secret!' >&2; exit 1
-elif [[ ! "${TGBOTS_BOT_SECRET}" =~ ^AA[a-zA-Z0-9_-]{33}$ ]]; then
+elif [[ ! "${TGBOTS_BOT_SECRET}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
  echo 'Wrong bot secret!' >&2; exit 1
 elif [[ -z "${TGBOTS_CHAT_ID}" ]]; then
  echo 'No chat id!' >&2; exit 1
@@ -72,7 +72,7 @@ elif [[ ! -s "${TGBOTS_OUTPUT}" ]]; then
  echo "\"${TGBOTS_OUTPUT}\" is empty!" >&2; exit 1
 fi
 
-TGBOTS_CHECKS="$(yq -Mer '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
+TGBOTS_CHECKS="$(yq -Mr -p=json -o=json '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
 if [[ $? -ne 0 ]]; then
  echo 'Parse output error!' >&2; exit 1
 elif [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
