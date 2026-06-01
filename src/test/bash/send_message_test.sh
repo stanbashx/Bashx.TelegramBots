@@ -186,6 +186,15 @@ rm "${TGBOTS_OUTPUT}"
 :> "${STDERR}"
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT='{}0' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse output error!'
+rm "${TGBOTS_OUTPUT}"
+
+:> "${STDERR}"
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_OUTPUT='{"ok":false}' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
