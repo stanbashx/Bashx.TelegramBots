@@ -38,7 +38,7 @@ for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" '' '' '' '' 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check bot id(${#TGBOTS_BOT_ID}) \"${TGBOTS_BOT_ID}\"" "$(<"${STDERR}")" 'Wrong bot id!'
+ . $asserts/strings/eq.sh "Check bot id(${#TGBOTS_BOT_ID}): \"${TGBOTS_BOT_ID}\"" "$(<"${STDERR}")" 'Wrong bot id!'
 done
 
 TGBOTS_BOT_ID='1234567890123456'
@@ -58,7 +58,7 @@ for TGBOTS_BOT_SECRET in "${TGBOTS_BOT_SECRETS[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" '' '' '' 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check bot secret(${#TGBOTS_BOT_SECRET}) \"${TGBOTS_BOT_SECRET}\"" "$(<"${STDERR}")" 'Wrong bot secret!'
+ . $asserts/strings/eq.sh "Check bot secret(${#TGBOTS_BOT_SECRET}): \"${TGBOTS_BOT_SECRET}\"" "$(<"${STDERR}")" 'Wrong bot secret!'
 done
 
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
@@ -74,7 +74,7 @@ for TGBOTS_CHAT_ID in "${TGBOTS_CHAT_IDS[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" '' '' 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_CHAT_ID}) \"${TGBOTS_CHAT_ID}\"" "$(<"${STDERR}")" 'Wrong chat id!'
+ . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_CHAT_ID}): \"${TGBOTS_CHAT_ID}\"" "$(<"${STDERR}")" 'Wrong chat id!'
 done
 
 TGBOTS_CHAT_ID=1
@@ -148,7 +148,7 @@ for HTTP_CODE in "${HTTP_CODES[@]}"; do
   MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Send tg message error!'
+ . $asserts/strings/eq.sh "Check http code(${#HTTP_CODE}): \"${HTTP_CODE}\"" "$(<"${STDERR}")" 'Code error!'
 done
 
 :> "${STDERR}"
