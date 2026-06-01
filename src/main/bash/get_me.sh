@@ -53,23 +53,18 @@ elif [[ ! -s "${TGBOTS_OUTPUT}" ]]; then
  echo "\"${TGBOTS_OUTPUT}\" is empty!" >&2; exit 1
 fi
 
+TGBOTS_OUTPUT_TAGS="$(yq -Mer -p=json -o=json 'tag' "${TGBOTS_OUTPUT}" 2>/dev/null)"
+if [[ $? -ne 0 || "${TGBOTS_OUTPUT_TAGS}" != '!!map' ]]; then
+ echo 'Parse output error!' >&2; exit 1; fi
+
 TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
-if [[ $? -ne 0 ]]; then
- echo 'Parse output error!' >&2; exit 1
-elif [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
- echo 'Check output error!' >&2; exit 1
-fi
+if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
+ echo 'Check output error!' >&2; exit 1; fi
 
 RESPONSE_BOT_ID="$(yq -Mr -p=json -o=json '.result.id // ""' "${TGBOTS_OUTPUT}" 2>/dev/null)"
-if [[ $? -ne 0 ]]; then
- echo 'Parse output error!' >&2; exit 1
-elif [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" ]]; then
- echo 'Check bot id error!' >&2; exit 1
-fi
+if [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" ]]; then
+ echo 'Check bot id error!' >&2; exit 1; fi
 
 RESPONSE_IS_BOT="$(yq -M -p=json -o=json '.result.is_bot // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
-if [[ $? -ne 0 ]]; then
- echo 'Parse output error!' >&2; exit 1
-elif [[ "${RESPONSE_IS_BOT}" != 'true' ]]; then
- echo 'Check bot error!' >&2; exit 1
-fi
+if [[ "${RESPONSE_IS_BOT}" != 'true' ]]; then
+ echo 'Check bot error!' >&2; exit 1; fi
