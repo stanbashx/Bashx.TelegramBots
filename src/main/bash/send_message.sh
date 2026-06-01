@@ -74,7 +74,7 @@ elif [[ ! -s "${TGBOTS_OUTPUT}" ]]; then
  echo "\"${TGBOTS_OUTPUT}\" is empty!" >&2; exit 1
 fi
 
-TGBOTS_CHECKS="$(yq -Mr -p=json -o=json '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
+TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
 if [[ $? -ne 0 ]]; then
  echo 'Parse output error!' >&2; exit 1
 elif [[ "${TGBOTS_CHECKS}" != 'true' ]]; then

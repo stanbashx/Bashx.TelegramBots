@@ -192,6 +192,15 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
 rm "${TGBOTS_OUTPUT}"
 
+:> "${STDERR}"
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT='{"ok":"true"}' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
+rm "${TGBOTS_OUTPUT}"
+
 MOCKS_CURL_DATA_PATH="$(mktemp)"
 
 :> "${STDERR}"
