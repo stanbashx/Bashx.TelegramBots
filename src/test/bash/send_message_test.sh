@@ -16,19 +16,16 @@ STDERR="$(mktemp)"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
 
 :> "${STDERR}"
-
 "${SCRIPT}" '' '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
 
 :> "${STDERR}"
-
 "${SCRIPT}" '' '' '' '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
 
 :> "${STDERR}"
-
 "${SCRIPT}" '' '' '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No bot id!'
@@ -64,7 +61,6 @@ done
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 
 :> "${STDERR}"
-
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" '' '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No chat id!'
@@ -80,13 +76,11 @@ done
 TGBOTS_CHAT_ID=1
 
 :> "${STDERR}"
-
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" '' '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No message!'
 
 :> "${STDERR}"
-
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "$(printf '%.1s' {1..4097})" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong message size!'
@@ -94,7 +88,6 @@ TGBOTS_CHAT_ID=1
 TGBOTS_MESSAGE="$(printf '%.1s' {1..4096})"
 
 :> "${STDERR}"
-
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No output!'
@@ -102,13 +95,11 @@ TGBOTS_MESSAGE="$(printf '%.1s' {1..4096})"
 TGBOTS_MESSAGE='foo'
 
 :> "${STDERR}"
-
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No output!'
 
 :> "${STDERR}"
-
 TGBOTS_OUTPUT="$(mktemp -d)"
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -116,7 +107,6 @@ TGBOTS_OUTPUT="$(mktemp -d)"
 rm -rf "${TGBOTS_OUTPUT}"
 
 :> "${STDERR}"
-
 TGBOTS_OUTPUT="$(mktemp)"
 rm "${TGBOTS_OUTPUT}"
 ln -s "${TGBOTS_OUTPUT}" "${TGBOTS_OUTPUT}"
@@ -126,7 +116,6 @@ ln -s "${TGBOTS_OUTPUT}" "${TGBOTS_OUTPUT}"
 rm "${TGBOTS_OUTPUT}"
 
 :> "${STDERR}"
-
 TGBOTS_OUTPUT="$(mktemp)"
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -134,7 +123,6 @@ TGBOTS_OUTPUT="$(mktemp)"
 rm "${TGBOTS_OUTPUT}"
 
 :> "${STDERR}"
-
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_EXIT_CODE=1 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
@@ -152,7 +140,33 @@ for HTTP_CODE in "${HTTP_CODES[@]}"; do
 done
 
 :> "${STDERR}"
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT_TYPE='symlink' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" is a symlink!"
+rm "${TGBOTS_OUTPUT}"
 
+:> "${STDERR}"
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT_TYPE='dir' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" is not a file!"
+rm -rf "${TGBOTS_OUTPUT}"
+
+:> "${STDERR}"
+PATH="src/test/bash/mocks:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_OUTPUT_TYPE='file' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" is empty!"
+rm "${TGBOTS_OUTPUT}"
+
+:> "${STDERR}"
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_OUTPUT='' \
@@ -161,7 +175,6 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" does not exist!"
 
 :> "${STDERR}"
-
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_OUTPUT='foo' \
@@ -171,7 +184,6 @@ PATH="src/test/bash/mocks:${PATH}" \
 rm "${TGBOTS_OUTPUT}"
 
 :> "${STDERR}"
-
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_OUTPUT='{"ok":false}' \
@@ -183,7 +195,6 @@ rm "${TGBOTS_OUTPUT}"
 MOCKS_CURL_DATA_PATH="$(mktemp)"
 
 :> "${STDERR}"
-
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \

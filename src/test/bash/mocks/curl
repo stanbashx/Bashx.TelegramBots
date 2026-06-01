@@ -12,8 +12,15 @@ done
 if [[ -n "${MOCKS_CURL_DATA}" && -n "${MOCKS_CURL_DATA_PATH}" ]]; then
  printf '%s' "${MOCKS_CURL_DATA}" > "${MOCKS_CURL_DATA_PATH}" || exit 1; fi
 
-if [[ -n "${MOCKS_CURL_OUTPUT}" && -n "${MOCKS_CURL_OUTPUT_PATH}" ]]; then
- printf '%s' "${MOCKS_CURL_OUTPUT}" > "${MOCKS_CURL_OUTPUT_PATH}" || exit 1; fi
+if [[ -n "${MOCKS_CURL_OUTPUT_PATH}" ]]; then
+ case "${MOCKS_CURL_OUTPUT_TYPE}" in
+  'file') touch "${MOCKS_CURL_OUTPUT_PATH}" || exit 1;;
+  'symlink') ln -s "${MOCKS_CURL_OUTPUT_PATH}" "${MOCKS_CURL_OUTPUT_PATH}" || exit 1;;
+  'dir') mkdir -p "${MOCKS_CURL_OUTPUT_PATH}" || exit 1;;
+  *) if [[ -n "${MOCKS_CURL_OUTPUT}" ]]; then
+   printf '%s' "${MOCKS_CURL_OUTPUT}" > "${MOCKS_CURL_OUTPUT_PATH}" || exit 1; fi;;
+ esac
+fi
 
 if [[ "${MOCKS_CURL_OUTPUT_FORMAT}" == '%{http_code}' ]]; then
  printf '%s' "${MOCKS_CURL_HTTP_CODE}"; fi
