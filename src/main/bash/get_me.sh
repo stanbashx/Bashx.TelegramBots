@@ -1,49 +1,70 @@
 #!/usr/local/bin/bash
 
-if test $# -ne 1; then
- echo 'Wrong arguments!'; exit 1; fi
+if [[ $# -ne 3 ]]; then
+ echo 'Wrong arguments!' >&2; exit 1; fi
 
-TG_OUTPUT="$1"
+TGBOTS_BOT_ID="$1"
+TGBOTS_BOT_SECRET="$2"
+TGBOTS_OUTPUT="$3"
 
-ARGUMENTS=(TG_BOT_ID TG_BOT_TOKEN TG_OUTPUT)
-for (( INDEX=0; INDEX<${#ARGUMENTS[@]}; INDEX++ )); do
- ARGUMENT="${ARGUMENTS[INDEX]}"
- if test -z "${!ARGUMENT}"; then
-  echo "Argument \"${ARGUMENT}\" is empty!"; exit $((100+INDEX)); fi
-done
+if [[ -z "${TGBOTS_BOT_ID}" ]]; then
+ echo 'No bot id!' >&2; exit 1
+elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
+ echo 'Wrong bot id!' >&2; exit 1
+elif [[ -z "${TGBOTS_BOT_SECRET}" ]]; then
+ echo 'No bot secret!' >&2; exit 1
+elif [[ ! "${TGBOTS_BOT_SECRET}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
+ echo 'Wrong bot secret!' >&2; exit 1
+fi
 
-if test -f "${TG_OUTPUT}"; then
- echo "File \"${TG_OUTPUT}\" exists!"; exit 1; fi
+if [[ -z "${TGBOTS_OUTPUT}" ]]; then
+ echo 'No output!' >&2; exit 1
+elif [[ -L "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" is a symlink!" >&2; exit 1
+elif [[ -e "${TGBOTS_OUTPUT}" ]]; then
+ if [[ -f "${TGBOTS_OUTPUT}" ]]; then
+  echo "\"${TGBOTS_OUTPUT}\" exists!" >&2; exit 1
+ else
+  echo "\"${TGBOTS_OUTPUT}\" is not a file!" >&2; exit 1
+ fi
+fi
+
+TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
 # https://core.telegram.org/bots/api#getme
 
-CODE=$(curl -m 8 -w '%{http_code}' -o "${TG_OUTPUT}" \
- "https://api.telegram.org/bot${TG_BOT_ID}:${TG_BOT_TOKEN}/getMe")
+HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
+ "${TGBOTS_URL}/getMe" \
+ -H 'Content-Type: application/json' \
+ --data "${TGBOTS_REQUEST_BODY}" \
+ -o "${TGBOTS_OUTPUT}" 2>/dev/null)
 
-if test $? -ne 0; then
- echo 'Curl error!'; exit 1; fi
-
-if [[ "${CODE}" != '200' ]]; then
- echo 'Get me error!'; exit 1; fi
-
-if [[ ! -f "${TG_OUTPUT}" ]]; then
- echo "No file \"${TG_OUTPUT}\"!"; exit 1
-elif [[ ! -s "${TG_OUTPUT}" ]]; then
- echo "File \"${TG_OUTPUT}\" is empty!"; exit 1
+if [[ $? -ne 0 ]]; then
+ echo 'Request error!' >&2; exit 1
+elif [[ "${HTTP_CODE}" != '200' ]]; then
+ echo 'Code error!' >&2; exit 1
 fi
 
-TG_CHECKS="$(yq -e '.ok // false' "${TG_OUTPUT}" 2>/dev/null)"
+if [[ -L "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" is a symlink!" >&2; exit 1
+elif [[ ! -e "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" does not exist!" >&2; exit 1
+elif [[ ! -f "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" is not a file!" >&2; exit 1
+elif [[ ! -s "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" is empty!" >&2; exit 1
+fi
 
-if test $? -ne 0; then
- echo 'Parse error!'; exit 1; fi
+TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_OUTPUT}" 2>/dev/null)"
+if [[ $? -ne 0 ]]; then
+ echo 'Parse output error!' >&2; exit 1
+elif [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
+ echo 'Check output error!' >&2; exit 1
+fi
 
-if [[ "${TG_CHECKS}" != 'true' ]]; then
- echo 'Check error!'; exit 1; fi
-
-RESPONSE_BOT_ID="$(yq -e '.result.id // ""' "${TG_OUTPUT}" 2>/dev/null)"
-
-if test $? -ne 0; then
- echo 'Parse error!'; exit 1; fi
-
-if [[ "${TG_BOT_ID}" != "${RESPONSE_BOT_ID}" ]]; then
- echo 'Wrong bot id!'; exit 1; fi
+RESPONSE_BOT_ID="$(yq -M -p=json -o=json '.result.id // ""' "${TGBOTS_OUTPUT}" 2>/dev/null)"
+if [[ $? -ne 0 ]]; then
+ echo 'Parse output error!' >&2; exit 1
+elif [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" ]]; then
+ echo 'Check bot id error!'; exit 1
+fi
