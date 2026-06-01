@@ -46,7 +46,7 @@ TGBOTS_REQUEST_BODY="{
 
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
- yq -Me -p=json -o=json '.text=strenv(STR_VALUE)')" || exit 1
+ yq -M -I=0 -p=json -o=json '.text=strenv(STR_VALUE)')"
 
 TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
@@ -61,10 +61,12 @@ HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
 if [[ $? -ne 0 ]]; then
  echo 'Request error!' >&2; exit 1
 elif [[ "${HTTP_CODE}" != '200' ]]; then
- echo 'Send tg message error!' >&2; exit 1
+ echo 'Code error!' >&2; exit 1
 fi
 
-if [[ ! -e "${TGBOTS_OUTPUT}" ]]; then
+if [[ -L "${TGBOTS_OUTPUT}" ]]; then
+ echo "\"${TGBOTS_OUTPUT}\" is a symlink!" >&2; exit 1
+elif [[ ! -e "${TGBOTS_OUTPUT}" ]]; then
  echo "\"${TGBOTS_OUTPUT}\" does not exist!" >&2; exit 1
 elif [[ ! -f "${TGBOTS_OUTPUT}" ]]; then
  echo "\"${TGBOTS_OUTPUT}\" is not a file!" >&2; exit 1
