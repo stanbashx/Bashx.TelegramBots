@@ -22,9 +22,7 @@ elif [[ -z "${TGBOTS_CHAT_ID}" ]]; then
  echo 'No chat id!' >&2; exit 1
 elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
  echo 'Wrong chat id!' >&2; exit 1
-elif [[ -z "${TGBOTS_MESSAGE}" ]]; then
- echo 'No message!' >&2; exit 1
-elif [[ "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
+elif [[ "${#TGBOTS_MESSAGE}" -gt 1024 ]]; then
  echo 'Wrong message size!' >&2; exit 1
 fi
 
@@ -38,6 +36,13 @@ elif [[ ! -f "${TGBOTS_INPUT}" ]]; then
  echo "\"${TGBOTS_INPUT}\" is not a file!" >&2; exit 1
 elif [[ ! -s "${TGBOTS_INPUT}" ]]; then
  echo "\"${TGBOTS_INPUT}\" is empty!" >&2; exit 1
+fi
+
+TGBOTS_INPUT_SIZE="$(stat -c %s "${TGBOTS_INPUT}")"
+if [[ $? -ne 0 || ! "${TGBOTS_INPUT_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
+ echo 'Get file size error!' >&2; exit 1
+elif [[ "${TGBOTS_INPUT_SIZE}" -gt 32000000 ]]; then
+ echo "\"${TGBOTS_INPUT}\" has wrong size!" >&2; exit 1
 fi
 
 if [[ -z "${TGBOTS_OUTPUT}" ]]; then
@@ -58,9 +63,9 @@ TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  "${TGBOTS_URL}/sendDocument" \
- --form "document=@${TG_INPUT}" \
- --form-string "chat_id=${TG_CHAT_ID}" \
- --form-string "caption=${TG_MESSAGE}" \
+ --form "document=@\"${TGBOTS_INPUT}\"" \
+ --form-string "chat_id=${TGBOTS_CHAT_ID}" \
+ --form-string "caption=${TGBOTS_MESSAGE}" \
  --form-string 'parse_mode=Markdown' \
  -o "${TGBOTS_OUTPUT}" 2>/dev/null)
 
