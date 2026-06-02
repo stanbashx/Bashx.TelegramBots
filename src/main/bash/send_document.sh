@@ -61,12 +61,20 @@ TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
 # https://core.telegram.org/bots/api#senddocument
 
+TGBOTS_REQUEST_ARGS=(
+ --form-string "chat_id=${TGBOTS_CHAT_ID}"
+)
+
+if [[ -n "${TGBOTS_MESSAGE}" ]]; then
+ TGBOTS_REQUEST_ARGS+=(
+  --form-string "caption=${TGBOTS_MESSAGE}"
+  --form-string 'parse_mode=Markdown'
+ ); fi
+
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  "${TGBOTS_URL}/sendDocument" \
  --form "document=@\"${TGBOTS_INPUT}\"" \
- --form-string "chat_id=${TGBOTS_CHAT_ID}" \
- --form-string "caption=${TGBOTS_MESSAGE}" \
- --form-string 'parse_mode=Markdown' \
+ "${TGBOTS_REQUEST_ARGS[@]}" \
  -o "${TGBOTS_OUTPUT}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
