@@ -25,12 +25,12 @@ while IFS= read -r -d '' SCRIPT; do
 done < <(find "${SCRIPTS}" -depth -type f -print0)
 
 if [[ ${SCRIPTS_COUNT} -eq 0 ]]; then
- echo "No scripts!" >&2; exit 1; fi
+ echo 'No scripts!' >&2; exit 1; fi
 
-COVERED_RESULT=$((COVERED_COUNT * 100 / SCRIPTS_COUNT))
-
-if [[ ${COVERED_RESULT} -lt 100 ]]; then
- echo "Only ${COVERED_RESULT}% of all scripts are covered!" >&2; exit 1
+if [[ ${COVERED_COUNT} -eq 0 ]]; then
+ echo 'No scripts are covered!' >&2; exit 1
+elif [[ ${COVERED_COUNT} -eq ${SCRIPTS_COUNT} ]]; then
+ echo 'All scripts are covered.'
 else
- echo 'All scripts are covered!'
+ echo "Only $((COVERED_COUNT * 100 / SCRIPTS_COUNT))% of all scripts are covered!" >&2; exit 1
 fi
