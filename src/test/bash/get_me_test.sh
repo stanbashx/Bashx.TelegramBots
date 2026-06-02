@@ -204,12 +204,12 @@ rm "${TGBOTS_OUTPUT}"
 :> "${STDERR}"
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_OUTPUT='{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":true}}' \
+ MOCKS_CURL_OUTPUT='{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":true}}' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
 . $asserts/files/not_empty.sh "${TGBOTS_OUTPUT}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_OUTPUT}")" '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":true}}'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_OUTPUT}")" '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":true}}'
 rm "${TGBOTS_OUTPUT}"
 
 rm "${STDERR}"
