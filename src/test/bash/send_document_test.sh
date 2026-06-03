@@ -73,7 +73,13 @@ for TGBOTS_CHAT_ID in "${TGBOTS_CHAT_IDS[@]}"; do
  . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_CHAT_ID}): \"${TGBOTS_CHAT_ID}\"" "$(<"${STDERR}")" 'Wrong chat id!'
 done
 
-TGBOTS_CHAT_ID=1
+TGBOTS_CHAT_IDS=('-100123456' '-100' '-1' 1)
+for TGBOTS_CHAT_ID in "${TGBOTS_CHAT_IDS[@]}"; do
+ :> "${STDERR}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" '' '' '' 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No src!'
+done
 
 :> "${STDERR}"
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "$(printf '%.1s' {1..1025})" '' '' 2>"${STDERR}"
@@ -261,7 +267,6 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 rm "${TGBOTS_DST}"
 rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
 
-TGBOTS_CHAT_ID='-1'
 TGBOTS_MESSAGE=''
 
 MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
