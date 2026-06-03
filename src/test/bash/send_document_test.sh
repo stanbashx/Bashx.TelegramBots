@@ -222,23 +222,15 @@ for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
  rm "${TGBOTS_DST}"
 done
 
-echo 'Not implemented!' >&2; exit 1 # todo
-
-MOCKS_CURL_DATA_PATH="$(mktemp)"
-
 :> "${STDERR}"
 PATH="src/test/bash/mocks:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
- MOCKS_CURL_OUTPUT='{"ok":true}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
+ MOCKS_CURL_DST='{"ok":true}' \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
-. $asserts/files/not_empty.sh "${TGBOTS_OUTPUT}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_OUTPUT}")" '{"ok":true}'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
-rm "${MOCKS_CURL_DATA_PATH}"
-rm "${TGBOTS_OUTPUT}"
+. $asserts/files/not_empty.sh "${TGBOTS_DST}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
+rm "${TGBOTS_DST}"
 
 rm "${STDERR}"
