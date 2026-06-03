@@ -7,7 +7,7 @@ TGBOTS_BOT_ID="$1"
 TGBOTS_BOT_SECRET="$2"
 TGBOTS_CHAT_ID="$3"
 TGBOTS_MESSAGE="$4"
-TGBOTS_INPUT="$5"
+TGBOTS_SRC="$5"
 TGBOTS_OUTPUT="$6"
 
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
@@ -26,23 +26,23 @@ elif [[ "${#TGBOTS_MESSAGE}" -gt 1024 ]]; then
  echo 'Wrong message size!' >&2; exit 1
 fi
 
-if [[ -z "${TGBOTS_INPUT}" ]]; then
- echo 'No input!' >&2; exit 1
-elif [[ -L "${TGBOTS_INPUT}" ]]; then
- echo "\"${TGBOTS_INPUT}\" is a symlink!" >&2; exit 1
-elif [[ ! -e "${TGBOTS_INPUT}" ]]; then
- echo "\"${TGBOTS_INPUT}\" does not exist!" >&2; exit 1
-elif [[ ! -f "${TGBOTS_INPUT}" ]]; then
- echo "\"${TGBOTS_INPUT}\" is not a file!" >&2; exit 1
-elif [[ ! -s "${TGBOTS_INPUT}" ]]; then
- echo "\"${TGBOTS_INPUT}\" is empty!" >&2; exit 1
+if [[ -z "${TGBOTS_SRC}" ]]; then
+ echo 'No src!' >&2; exit 1
+elif [[ -L "${TGBOTS_SRC}" ]]; then
+ echo "\"${TGBOTS_SRC}\" is a symlink!" >&2; exit 1
+elif [[ ! -e "${TGBOTS_SRC}" ]]; then
+ echo "\"${TGBOTS_SRC}\" does not exist!" >&2; exit 1
+elif [[ ! -f "${TGBOTS_SRC}" ]]; then
+ echo "\"${TGBOTS_SRC}\" is not a file!" >&2; exit 1
+elif [[ ! -s "${TGBOTS_SRC}" ]]; then
+ echo "\"${TGBOTS_SRC}\" is empty!" >&2; exit 1
 fi
 
-TGBOTS_INPUT_SIZE="$(stat -c %s "${TGBOTS_INPUT}")"
-if [[ $? -ne 0 || ! "${TGBOTS_INPUT_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
+TGBOTS_SRC_SIZE="$(stat -c %s "${TGBOTS_SRC}")"
+if [[ $? -ne 0 || ! "${TGBOTS_SRC_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
  echo 'Get file size error!' >&2; exit 1
-elif [[ "${TGBOTS_INPUT_SIZE}" -gt 32000000 ]]; then
- echo "\"${TGBOTS_INPUT}\" has wrong size!" >&2; exit 1
+elif [[ "${TGBOTS_SRC_SIZE}" -gt 32000000 ]]; then
+ echo "\"${TGBOTS_SRC}\" has wrong size!" >&2; exit 1
 fi
 
 if [[ -z "${TGBOTS_OUTPUT}" ]]; then
@@ -73,7 +73,7 @@ if [[ -n "${TGBOTS_MESSAGE}" ]]; then
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  "${TGBOTS_URL}/sendDocument" \
- --form "document=@\"${TGBOTS_INPUT}\"" \
+ --form "document=@\"${TGBOTS_SRC}\"" \
  "${TGBOTS_REQUEST_ARGS[@]}" \
  -o "${TGBOTS_OUTPUT}" 2>/dev/null)
 
