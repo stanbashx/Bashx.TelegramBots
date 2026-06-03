@@ -85,7 +85,7 @@ for TGBOTS_MESSAGE in "${TGBOTS_MESSAGES[@]}"; do
  :> "${STDERR}"
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" '' '' 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check chat id(${#TGBOTS_CHAT_ID}): \"${TGBOTS_CHAT_ID}\"" "$(<"${STDERR}")" 'No src!'
+ . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No src!'
 done
 
 :> "${STDERR}"
@@ -198,7 +198,7 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" does not exist!"
 
-RESPONSES=('foo' '{}0')
+RESPONSES=('foo' '{}0' '[]' 'null' '"ok"')
 for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
  :> "${STDERR}"
  PATH="src/test/bash/mocks:${PATH}" \
@@ -233,4 +233,5 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
 rm "${TGBOTS_DST}"
 
+rm "${TGBOTS_SRC}"
 rm "${STDERR}"
