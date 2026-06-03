@@ -23,6 +23,6 @@ if [[ ! -s 'README.md' ]]; then
 
 mkdir -p 'build/zip'
 ISSUER="build/zip/${REP_NAME}-${VERSION}.zip"
-zip -r "${ISSUER}" 'src/main/bash' 'src/main/res' 'LICENSE' 'README.md'
+zip -r "${ISSUER}" 'src/main/bash' 'LICENSE' 'README.md'
 if [[ $? -ne 0 ]]; then
  echo 'Zip error!'; exit 1; fi
