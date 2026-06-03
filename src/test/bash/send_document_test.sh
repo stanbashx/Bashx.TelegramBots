@@ -243,16 +243,23 @@ for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
  rm "${TGBOTS_DST}"
 done
 
+MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
+EXPECTED_FORM_STRINGS="chat_id=${TGBOTS_CHAT_ID}
+caption=${TGBOTS_MESSAGE}
+parse_mode=Markdown"
 :> "${STDERR}"
 PATH="src/test/bash/mocks/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
+ MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
 . $asserts/files/not_empty.sh "${TGBOTS_DST}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORM_STRINGS_PATH}")" "${EXPECTED_FORM_STRINGS}"
 rm "${TGBOTS_DST}"
+rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
 
 TGBOTS_CHAT_ID='-1'
 TGBOTS_MESSAGE=''
