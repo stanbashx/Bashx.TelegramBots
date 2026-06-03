@@ -1,19 +1,29 @@
 #!/usr/local/bin/bash
 
-tests='src/test/bash'
-asserts="${tests}/asserts"
-tgbots="src/main/bash"
+if [[ ! -d "${asserts}" ]]; then
+ echo 'No asserts!'; exit 1; fi
 
-. $tests/readme_test.sh
-. $tests/license_test.sh
-. $tests/create_forum_topic_test.sh
-. $tests/download_file_test.sh
-. $tests/edit_topic_emoji_test.sh
-. $tests/get_file_test.sh
-. $tests/get_me_test.sh
-. $tests/get_topic_stickers_test.sh
-. $tests/get_updates_test.sh
-. $tests/send_document_test.sh
-. $tests/send_message_test.sh
+TESTS='src/test/bash'
+
+# todo unit_test.sh -> check_tests.sh
+
+while IFS= read -r -d '' TEST_PATH; do
+ if [[ "${TEST_PATH}" == "${TESTS}/unit_test.sh" \
+  || "${TEST_PATH}" =~ ^${TESTS}/check_.+\.sh$ \
+  || "${TEST_PATH}" =~ ^${TESTS}/mocks/.+$ \
+  ]]; then continue
+ elif [[ -L "${TEST_PATH}" || ! -f "${TEST_PATH}" \
+  || ! -s "${TEST_PATH}" || ! -x "${TEST_PATH}" \
+  || ! "${TEST_PATH}" =~ ^${TESTS}/.+_test\.sh$ \
+  ]] || ! bash -n "${TEST_PATH}"; then
+  echo "\"${TEST_PATH}\" is not supported!" >&2; exit 1
+ fi
+ "${TEST_PATH}" || exit 1
+done < <(find "${TESTS}" -depth -type f -print0)
+
+. ${TESTS}/check_coverage.sh
+
+. ${TESTS}/check_license.sh
+. ${TESTS}/check_readme.sh
 
 echo 'All tests were successful.'
