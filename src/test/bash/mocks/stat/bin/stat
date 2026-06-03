@@ -11,4 +11,4 @@ elif [[ -n "${MOCKS_STAT_EXIT_CODE}" ]]; then
  echo 'Wrong exit code!' >&2; exit 1
 fi
 
-prinf '%s' ${MOCKS_STAT_SIZE}
+printf '%s' ${MOCKS_STAT_SIZE}
