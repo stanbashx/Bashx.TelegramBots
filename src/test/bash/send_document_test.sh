@@ -198,43 +198,31 @@ PATH="src/test/bash/mocks:${PATH}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" does not exist!"
 
+RESPONSES=('foo' '{}0')
+for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
+ :> "${STDERR}"
+ PATH="src/test/bash/mocks:${PATH}" \
+  MOCKS_CURL_HTTP_CODE=200 \
+  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse dst error!'
+ rm "${TGBOTS_DST}"
+done
+
+RESPONSES=('{"ok":false}' '{"ok":"true"}' '{"ok":1}')
+for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
+ :> "${STDERR}"
+ PATH="src/test/bash/mocks:${PATH}" \
+  MOCKS_CURL_HTTP_CODE=200 \
+  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check dst error!'
+ rm "${TGBOTS_DST}"
+done
+
 echo 'Not implemented!' >&2; exit 1 # todo
-
-:> "${STDERR}"
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_OUTPUT='foo' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse output error!'
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_OUTPUT='{}0' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse output error!'
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_OUTPUT='{"ok":false}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-PATH="src/test/bash/mocks:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_OUTPUT='{"ok":"true"}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check output error!'
-rm "${TGBOTS_OUTPUT}"
 
 MOCKS_CURL_DATA_PATH="$(mktemp)"
 
