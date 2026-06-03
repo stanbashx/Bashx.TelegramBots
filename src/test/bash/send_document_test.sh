@@ -116,32 +116,38 @@ TGBOTS_SRC="$(mktemp)"
 "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_SRC}\" is empty!"
-rm "${TGBOTS_SRC}"
+
+printf 'foo' > "${TGBOTS_SRC}"
+
+:> "${STDERR}"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No dst!'
+
+:> "${STDERR}"
+TGBOTS_DST="$(mktemp)"
+rm "${TGBOTS_DST}"
+ln -s "${TGBOTS_DST}" "${TGBOTS_DST}"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" is a symlink!"
+rm "${TGBOTS_DST}"
+
+:> "${STDERR}"
+TGBOTS_DST="$(mktemp -d)"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" is not a file!"
+rm -rf "${TGBOTS_DST}"
+
+:> "${STDERR}"
+TGBOTS_DST="$(mktemp)"
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" exists!"
+rm "${TGBOTS_DST}"
 
 echo 'Not implemented!' >&2; exit 1 # todo
-
-:> "${STDERR}"
-TGBOTS_OUTPUT="$(mktemp -d)"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" is not a file!"
-rm -rf "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-TGBOTS_OUTPUT="$(mktemp)"
-rm "${TGBOTS_OUTPUT}"
-ln -s "${TGBOTS_OUTPUT}" "${TGBOTS_OUTPUT}"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" is a symlink!"
-rm "${TGBOTS_OUTPUT}"
-
-:> "${STDERR}"
-TGBOTS_OUTPUT="$(mktemp)"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_OUTPUT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_OUTPUT}\" exists!"
-rm "${TGBOTS_OUTPUT}"
 
 :> "${STDERR}"
 PATH="src/test/bash/mocks:${PATH}" \
