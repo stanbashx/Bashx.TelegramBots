@@ -250,6 +250,8 @@ for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
 done
 
 MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
+MOCKS_CURL_FORMS_PATH="$(mktemp)"
+
 EXPECTED_FORM_STRINGS="chat_id=${TGBOTS_CHAT_ID}
 caption=${TGBOTS_MESSAGE}
 parse_mode=Markdown"
@@ -258,31 +260,36 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
  MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
+ MOCKS_CURL_FORMS_PATH="${MOCKS_CURL_FORMS_PATH}" \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
 . $asserts/files/not_empty.sh "${TGBOTS_DST}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORM_STRINGS_PATH}")" "${EXPECTED_FORM_STRINGS}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORMS_PATH}")" "document=@\"${TGBOTS_SRC}\""
 rm "${TGBOTS_DST}"
 rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+rm "${MOCKS_CURL_FORMS_PATH}"
 
 TGBOTS_MESSAGE=''
 
-MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
 :> "${STDERR}"
 PATH="src/test/bash/mocks/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
  MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
+ MOCKS_CURL_FORMS_PATH="${MOCKS_CURL_FORMS_PATH}" \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
 . $asserts/files/not_empty.sh "${TGBOTS_DST}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORM_STRINGS_PATH}")" "chat_id=${TGBOTS_CHAT_ID}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORMS_PATH}")" "document=@\"${TGBOTS_SRC}\""
 rm "${TGBOTS_DST}"
 rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+rm "${MOCKS_CURL_FORMS_PATH}"
 
 rm "${TGBOTS_SRC}"
 rm "${STDERR}"
