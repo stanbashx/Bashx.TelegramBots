@@ -2,7 +2,7 @@
 
 REP_OWNER='StanleyProjects'
 REP_NAME='TelegramBots'
-VERSION='0.0.7'
+VERSION='0.0.8'
 
 if [[ -d 'build' ]]; then
  echo 'Build dir exists!'; exit 1; fi
