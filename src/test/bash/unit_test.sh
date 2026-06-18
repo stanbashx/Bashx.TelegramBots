@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
 if [[ ! -d "${asserts}" ]]; then
- echo 'No asserts!'; exit 1; fi
+ echo 'No asserts!' >&2; exit 1; fi
 
 TESTS='src/test/bash'
 
@@ -15,7 +15,7 @@ while IFS= read -r -d '' TEST_PATH; do
  elif [[ -L "${TEST_PATH}" || ! -f "${TEST_PATH}" \
   || ! -s "${TEST_PATH}" || ! -x "${TEST_PATH}" \
   || ! "${TEST_PATH}" =~ ^${TESTS}/.+_test\.sh$ \
-  ]] || ! bash -n "${TEST_PATH}"; then
+  ]] || ! /usr/local/bin/bash -n "${TEST_PATH}"; then
   echo "\"${TEST_PATH}\" is not supported!" >&2; exit 1
  fi
  "${TEST_PATH}" || exit 1
@@ -26,4 +26,4 @@ done < <(find "${TESTS}" -depth -type f -print0)
 . ${TESTS}/check_license.sh
 . ${TESTS}/check_readme.sh
 
-echo 'All tests were successful.'
+echo 'All tests passed.'
