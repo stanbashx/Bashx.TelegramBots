@@ -126,21 +126,21 @@ TGBOTS_SRC="$(mktemp)"
 printf 'foo' > "${TGBOTS_SRC}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_EXIT_CODE=1 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_SIZE='foo' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_SIZE=32000001 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'

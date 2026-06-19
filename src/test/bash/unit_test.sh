@@ -1,7 +1,10 @@
 #!/usr/local/bin/bash
 
 if [[ ! -d "${asserts}" ]]; then
- echo 'No asserts!' >&2; exit 1; fi
+ echo 'No asserts!' >&2; exit 1
+elif [[ ! -d "${mocks}" ]]; then
+ echo 'No mocks!' >&2; exit 1
+fi
 
 TESTS='src/test/bash'
 
