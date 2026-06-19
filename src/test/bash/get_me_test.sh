@@ -2,28 +2,49 @@
 
 SCRIPT='src/main/bash/get_me.sh'
 
-echo "Running test of \"${SCRIPT}\"..."
+echo "Running test for \"${SCRIPT}\"..."
 
 . $asserts/files/execs.sh "${SCRIPT}"
 
-if ! bash -n "${SCRIPT}"; then
- echo "\"${SCRIPT}\" has wrong syntax!" >&2; exit 1; fi
+if ! /usr/local/bin/bash -n "${SCRIPT}"; then
+ echo "\"${SCRIPT}\" has invalid syntax!" >&2; exit 1; fi
 
+STDOUT="$(mktemp)"
 STDERR="$(mktemp)"
 
-"${SCRIPT}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
+#
 
+:> "${STDOUT}"
 :> "${STDERR}"
-"${SCRIPT}" '' '' 2>"${STDERR}"
+"${SCRIPT}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" $'Wrong arguments!\n'
 
+:> "${STDOUT}"
 :> "${STDERR}"
-"${SCRIPT}" '' '' '' '' 2>"${STDERR}"
+"${SCRIPT}" '' >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong arguments!'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" $'Wrong arguments!\n'
+
+:> "${STDOUT}"
+:> "${STDERR}"
+"${SCRIPT}" '' '' >"${STDOUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" $'Wrong arguments!\n'
+
+:> "${STDOUT}"
+:> "${STDERR}"
+"${SCRIPT}" '' '' '' '' >"${STDOUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" $'Wrong arguments!\n'
+
+#
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDERR}"
 "${SCRIPT}" '' '' '' 2>"${STDERR}"
