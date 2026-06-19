@@ -126,21 +126,21 @@ TGBOTS_SRC="$(mktemp)"
 printf 'foo' > "${TGBOTS_SRC}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_EXIT_CODE=1 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_SIZE='foo' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/stat/bin:${PATH}" \
+PATH="${mocks}/stat/bin:${PATH}" \
  MOCKS_STAT_SIZE=32000001 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -175,7 +175,7 @@ TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_EXIT_CODE=1 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -184,7 +184,7 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 HTTP_CODES=(2 20 22 202 2000 401 403 429 500 '' 'foo')
 for HTTP_CODE in "${HTTP_CODES[@]}"; do
  :> "${STDERR}"
- PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+ PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -192,7 +192,7 @@ for HTTP_CODE in "${HTTP_CODES[@]}"; do
 done
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST_TYPE='symlink' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
@@ -201,7 +201,7 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 rm "${TGBOTS_DST}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST_TYPE='dir' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
@@ -210,7 +210,7 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 rm -rf "${TGBOTS_DST}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST_TYPE='file' \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
@@ -219,7 +219,7 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 rm "${TGBOTS_DST}"
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -228,7 +228,7 @@ PATH="src/test/bash/mocks/curl/bin:${PATH}" \
 RESPONSES=('foo' '{}0' '[]' 'null' '"ok"')
 for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
  :> "${STDERR}"
- PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+ PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
@@ -240,7 +240,7 @@ done
 RESPONSES=('{"ok":false}' '{"ok":"true"}' '{"ok":1}')
 for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
  :> "${STDERR}"
- PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+ PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
@@ -250,13 +250,16 @@ for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
 done
 
 MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
+rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+
 MOCKS_CURL_FORMS_PATH="$(mktemp)"
+rm "${MOCKS_CURL_FORMS_PATH}"
 
 EXPECTED_FORM_STRINGS="chat_id=${TGBOTS_CHAT_ID}
 caption=${TGBOTS_MESSAGE}
 parse_mode=Markdown"
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
  MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
@@ -275,7 +278,7 @@ rm "${MOCKS_CURL_FORMS_PATH}"
 TGBOTS_MESSAGE=''
 
 :> "${STDERR}"
-PATH="src/test/bash/mocks/curl/bin:${PATH}" \
+PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
  MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \

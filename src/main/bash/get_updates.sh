@@ -31,10 +31,10 @@ fi
 
 TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
 
-# https://core.telegram.org/bots/api#getme
+# https://core.telegram.org/bots/api#getUpdates
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
- "${TGBOTS_URL}/getMe" \
+ "${TGBOTS_URL}/getUpdates" \
  -o "${TGBOTS_DST}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
@@ -60,8 +60,3 @@ if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
 TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
 if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
  echo 'Check dst error!' >&2; exit 1; fi
-
-RESPONSE_BOT_ID="$(yq -M -p=json -o=json '.result.id // ""' "${TGBOTS_DST}" 2>/dev/null)"
-RESPONSE_IS_BOT="$(yq -M -p=json -o=json '.result.is_bot // false' "${TGBOTS_DST}" 2>/dev/null)"
-if [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" || "${RESPONSE_IS_BOT}" != 'true' ]]; then
- echo 'Check bot error!' >&2; exit 1; fi
