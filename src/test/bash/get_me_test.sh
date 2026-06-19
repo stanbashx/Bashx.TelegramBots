@@ -233,12 +233,12 @@ rm "${TGBOTS_DST}"
 
 TGBOTS_BOT_ID='12345678'
 VALUES=(
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'"}}'
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":null}}'
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":{}}}'
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":[]}}'
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":1}}'
- '{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":"true"}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}'}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":null}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":{}}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":[]}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":1}}'
+ '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":"true"}}'
 )
 for MOCKS_CURL_DST in "${VALUES[@]}"; do
  :> "${STDOUT}"
@@ -262,7 +262,7 @@ TGBOTS_BOT_ID='12345678'
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
-MOCKS_CURL_DST='{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":true}}'
+MOCKS_CURL_DST='{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":true}}'
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
