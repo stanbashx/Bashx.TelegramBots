@@ -1,7 +1,7 @@
 /*
-!/.github
-!/src
-!.gitignore
-!assemble.sh
-!LICENSE
-!README.md
+!/.github/
+!/src/
+!/.gitignore
+!/assemble.sh
+!/LICENSE
+!/README.md
