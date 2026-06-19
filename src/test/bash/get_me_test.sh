@@ -180,80 +180,90 @@ PATH="${mocks}/curl/bin:${PATH}" \
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
+VALUES=('foo' '{}0' '[]' 'null' '42')
+for MOCKS_CURL_DST in "${VALUES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_DST="$(mktemp)"
+ rm "${TGBOTS_DST}"
+ PATH="${mocks}/curl/bin:${PATH}" \
+  MOCKS_CURL_HTTP_CODE=200 \
+  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" $'Parse dst error!\n'
+ rm "${TGBOTS_DST}"
+done
 
+VALUES=('{}' '{"ok":null}' '{"ok":{}}' '{"ok":[]}' '{"ok":0}' '{"ok":1}' '{"ok":-1}' '{"ok":""}' '{"ok":"true"}' '{"ok":false}')
+for MOCKS_CURL_DST in "${VALUES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_DST="$(mktemp)"
+ rm "${TGBOTS_DST}"
+ PATH="${mocks}/curl/bin:${PATH}" \
+  MOCKS_CURL_HTTP_CODE=200 \
+  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" $'Check dst error!\n'
+ rm "${TGBOTS_DST}"
+done
+
+:> "${STDOUT}"
 :> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='foo' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse dst error!'
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{}0' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse dst error!'
-rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":false}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check dst error!'
-rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":"true"}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check dst error!'
-rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check bot id error!'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}"  $'Check bot id error!\n'
 rm "${TGBOTS_DST}"
 
+:> "${STDOUT}"
 :> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_DST="$(mktemp)"
+rm "${TGBOTS_DST}"
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST='{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'"}}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check bot error!'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}"  $'Check bot error!\n'
 rm "${TGBOTS_DST}"
 
+:> "${STDOUT}"
 :> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":"true"}}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check bot error!'
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
+MOCKS_CURL_DST='{"ok":true,"result":{"id":"'${TGBOTS_BOT_ID}'","is_bot":true}}'
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":true}}' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" 2>"${STDERR}"
+ MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
-. $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
-. $asserts/files/not_empty.sh "${TGBOTS_DST}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true,"result":{"id":'${TGBOTS_BOT_ID}',"is_bot":true}}'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/empty.sh "${STDERR}"
+. $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
 rm "${TGBOTS_DST}"
 
+#
+
+rm "${STDOUT}"
 rm "${STDERR}"
