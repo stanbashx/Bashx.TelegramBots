@@ -228,7 +228,7 @@ PATH="${mocks}/curl/bin:${PATH}" \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}"  $'Check bot id error!\n'
+. $asserts/files/equals.sh "${STDERR}" $'Check bot id error!\n'
 rm "${TGBOTS_DST}"
 
 TGBOTS_BOT_ID='12345678'

@@ -62,9 +62,6 @@ if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
  echo 'Check dst error!' >&2; exit 1; fi
 
 RESPONSE_BOT_ID="$(yq -M -p=json -o=json '.result.id // ""' "${TGBOTS_DST}" 2>/dev/null)"
-if [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" ]]; then
- echo 'Check bot id error!' >&2; exit 1; fi
-
 RESPONSE_IS_BOT="$(yq -M -p=json -o=json '.result.is_bot // false' "${TGBOTS_DST}" 2>/dev/null)"
-if [[ "${RESPONSE_IS_BOT}" != 'true' ]]; then
+if [[ "${TGBOTS_BOT_ID}" != "${RESPONSE_BOT_ID}" || "${RESPONSE_IS_BOT}" != 'true' ]]; then
  echo 'Check bot error!' >&2; exit 1; fi
