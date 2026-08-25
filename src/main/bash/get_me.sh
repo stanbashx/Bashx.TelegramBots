@@ -36,12 +36,12 @@ elif [[ -e "${TGBOTS_DST}" ]]; then
  fi
 fi
 
-TGBOTS_URL=""
+TGBOTS_URL='https://api.telegram.org'
 
 # https://core.telegram.org/bots/api#getme
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
- -K <(printf 'url="https://api.telegram.org/bot%s:%s/getMe"' "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
+ -K <(printf 'url="%s/bot%s:%s/getMe"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
  -o "${TGBOTS_DST}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
