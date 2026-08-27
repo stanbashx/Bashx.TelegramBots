@@ -13,7 +13,9 @@ fi
 
 TGBOTS_BOT_SECRET_SRC="$2"
 
-if [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+if [[ -z "${TGBOTS_BOT_SECRET_SRC}" ]]; then
+ echo 'No bot secret src!' >&2; exit 1
+elif [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
  echo 'Wrong bot secret src!' >&2; exit 1
 elif [[ ! -v "${TGBOTS_BOT_SECRET_SRC}" ]]; then
  echo 'Bot secret is unset!' >&2; exit 1
