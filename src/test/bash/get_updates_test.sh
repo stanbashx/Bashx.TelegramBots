@@ -62,29 +62,64 @@ for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  . $asserts/files/equals.sh "${STDERR}" $'Wrong bot id!\n'
 done
 
-TGBOTS_BOT_IDS=('12345678' '1234567890123456')
-for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
+#
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET_SRC=''
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'No bot secret src!'$'\n'
+
+TGBOTS_BOT_SECRET_SOURCES=($'\t' $'\n' '-TGBOTS_BOT_SECRET' '42TGBOTS_BOT_SECRET' 'TGBOTS_BOT_SECRET+')
+for TGBOTS_BOT_SECRET_SRC in "${TGBOTS_BOT_SECRET_SOURCES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
- TGBOTS_BOT_SECRET=''
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" '' >"${STDOUT}" 2>"${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
- . $asserts/files/equals.sh "${STDERR}" $'No bot secret!\n'
+ . $asserts/files/equals.sh "${STDERR}" 'Wrong bot secret src!'$'\n'
 done
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'Bot secret is unset!'$'\n'
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET=''
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'No bot secret!'$'\n'
 
 TGBOTS_BOT_SECRETS=('a' "$(printf '%.1s' {1..34})" "$(printf '%.1s' {1..36})" "$(printf '%.1s' {1..34})?")
 for TGBOTS_BOT_SECRET in "${TGBOTS_BOT_SECRETS[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" '' >"${STDOUT}" 2>"${STDERR}"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" $'Wrong bot secret!\n'
 done
 
 #
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDOUT}"
 :> "${STDERR}"

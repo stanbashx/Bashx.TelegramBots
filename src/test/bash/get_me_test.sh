@@ -62,6 +62,8 @@ for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  . $asserts/files/equals.sh "${STDERR}" $'Wrong bot id!\n'
 done
 
+#
+
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
