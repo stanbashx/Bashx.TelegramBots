@@ -285,6 +285,47 @@ rm "${TGBOTS_DST}"
 
 #
 
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_DST="$(mktemp)"
+rm "${TGBOTS_DST}"
+PATH="${mocks}/curl/bin:${PATH}" \
+ MOCKS_CURL_EXIT_CODE=1 \
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" $'Request error!\n'
+rm -f "${TGBOTS_DST}"
+
+HTTP_CODES=(2 20 22 202 2000 401 403 429 500 '' 'foo' '-1' '200 ' ' 200' $'\n200' $'\t200')
+for HTTP_CODE in "${HTTP_CODES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+ TGBOTS_CHAT_ID='1'
+ TGBOTS_MESSAGE='foobarbaz'
+ TGBOTS_DST="$(mktemp)"
+ rm "${TGBOTS_DST}"
+ PATH="${mocks}/curl/bin:${PATH}" \
+  MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
+  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" $'Code error!\n'
+ rm -f "${TGBOTS_DST}"
+done
+
+#
+
 echo 'Not implemented!'; exit 1 # todo
 
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
@@ -292,58 +333,6 @@ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_CHAT_ID=1
 
 TGBOTS_MESSAGE='foo'
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_EXIT_CODE=1 \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Request error!'
-
-HTTP_CODES=(2 20 22 202 2000 401 403 429 500 '' 'foo')
-for HTTP_CODE in "${HTTP_CODES[@]}"; do
- :> "${STDERR}"
- PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
- . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "Check http code(${#HTTP_CODE}): \"${HTTP_CODE}\"" "$(<"${STDERR}")" 'Code error!'
-done
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST_TYPE='issue:symlink' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" is a symlink!"
-rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST_TYPE='issue:dir' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" is not a file!"
-rm -rf "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST_TYPE='issue:empty_file' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" is empty!"
-rm "${TGBOTS_DST}"
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_DST}\" does not exist!"
 
 :> "${STDERR}"
 PATH="${mocks}/curl/bin:${PATH}" \
