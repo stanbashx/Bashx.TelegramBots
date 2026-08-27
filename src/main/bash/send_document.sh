@@ -4,27 +4,41 @@ if [[ $# -ne 6 ]]; then
  echo 'Wrong arguments!' >&2; exit 1; fi
 
 TGBOTS_BOT_ID="$1"
-TGBOTS_BOT_SECRET="$2"
-TGBOTS_CHAT_ID="$3"
-TGBOTS_MESSAGE="$4"
-TGBOTS_SRC="$5"
-TGBOTS_DST="$6"
 
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
  echo 'No bot id!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
  echo 'Wrong bot id!' >&2; exit 1
-elif [[ -z "${TGBOTS_BOT_SECRET}" ]]; then
+fi
+
+TGBOTS_BOT_SECRET_SRC="$2"
+
+if [[ -z "${TGBOTS_BOT_SECRET_SRC}" ]]; then
+ echo 'No bot secret src!' >&2; exit 1
+elif [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+ echo 'Wrong bot secret src!' >&2; exit 1
+elif [[ ! -v "${TGBOTS_BOT_SECRET_SRC}" ]]; then
+ echo 'Bot secret is unset!' >&2; exit 1
+elif [[ -z "${!TGBOTS_BOT_SECRET_SRC}" ]]; then
  echo 'No bot secret!' >&2; exit 1
-elif [[ ! "${TGBOTS_BOT_SECRET}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
+elif [[ ! "${!TGBOTS_BOT_SECRET_SRC}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
  echo 'Wrong bot secret!' >&2; exit 1
-elif [[ -z "${TGBOTS_CHAT_ID}" ]]; then
+fi
+
+TGBOTS_CHAT_ID="$3"
+
+if [[ -z "${TGBOTS_CHAT_ID}" ]]; then
  echo 'No chat id!' >&2; exit 1
 elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
  echo 'Wrong chat id!' >&2; exit 1
-elif [[ "${#TGBOTS_MESSAGE}" -gt 1024 ]]; then
- echo 'Wrong message size!' >&2; exit 1
 fi
+
+TGBOTS_MESSAGE="$4"
+
+if [[ "${#TGBOTS_MESSAGE}" -gt 1024 ]]; then
+ echo 'Wrong message size!' >&2; exit 1; fi
+
+TGBOTS_SRC="$5"
 
 if [[ -z "${TGBOTS_SRC}" ]]; then
  echo 'No src!' >&2; exit 1
@@ -45,6 +59,8 @@ elif [[ "${TGBOTS_SRC_SIZE}" -gt 32000000 ]]; then
  echo "\"${TGBOTS_SRC}\" has wrong size!" >&2; exit 1
 fi
 
+TGBOTS_DST="$6"
+
 if [[ -z "${TGBOTS_DST}" ]]; then
  echo 'No dst!' >&2; exit 1
 elif [[ -L "${TGBOTS_DST}" ]]; then
@@ -57,7 +73,7 @@ elif [[ -e "${TGBOTS_DST}" ]]; then
  fi
 fi
 
-TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
+TGBOTS_URL='https://api.telegram.org'
 
 # https://core.telegram.org/bots/api#senddocument
 
@@ -72,7 +88,7 @@ if [[ -n "${TGBOTS_MESSAGE}" ]]; then
  ); fi
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
- "${TGBOTS_URL}/sendDocument" \
+ -K <(printf 'url="%s/bot%s:%s/sendDocument"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
  --form "document=@\"${TGBOTS_SRC}\"" \
  "${TGBOTS_REQUEST_ARGS[@]}" \
  -o "${TGBOTS_DST}" 2>/dev/null)
