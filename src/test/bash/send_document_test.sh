@@ -225,28 +225,57 @@ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
-TGBOTS_CHAT_IDS=('-100123456' '-100' '-1' 1)
-for TGBOTS_CHAT_ID in "${TGBOTS_CHAT_IDS[@]}"; do
- :> "${STDERR}"
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" '' '' '' 2>"${STDERR}"
- . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No src!'
-done
-
+:> "${STDOUT}"
 :> "${STDERR}"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "$(printf '%.1s' {1..1025})" '' '' 2>"${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC=''
+TGBOTS_DST=''
+TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Wrong message size!'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'No src!'$'\n'
 
-TGBOTS_MESSAGES=('' "$(printf '%.1s' {1..1024})" 'foo')
-for TGBOTS_MESSAGE in "${TGBOTS_MESSAGES[@]}"; do
- :> "${STDERR}"
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" '' '' 2>"${STDERR}"
- . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'No src!'
-done
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+TGBOTS_DST=''
+TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" "\"${TGBOTS_SRC}\" is empty!"$'\n'
+rm -f "${TGBOTS_SRC}"
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+rm "${TGBOTS_SRC}"
+TGBOTS_DST=''
+TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" "\"${TGBOTS_SRC}\" does not exist!"$'\n'
+rm -f "${TGBOTS_SRC}"
+
+#
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDERR}"
 TGBOTS_SRC="$(mktemp)"
