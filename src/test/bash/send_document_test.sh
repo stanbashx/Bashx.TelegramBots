@@ -508,76 +508,80 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
-RESPONSES=('foo' '{}0' '[]' 'null' '"ok"')
-for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
- :> "${STDERR}"
- PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE=200 \
-  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
- . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Parse dst error!'
- rm "${TGBOTS_DST}"
-done
-
-RESPONSES=('{"ok":false}' '{"ok":"true"}' '{"ok":1}')
-for MOCKS_CURL_DST in "${RESPONSES[@]}"; do
- :> "${STDERR}"
- PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE=200 \
-  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
- . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
- . $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Check dst error!'
- rm "${TGBOTS_DST}"
-done
-
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE=''
+TGBOTS_SRC="$(mktemp)"
+printf '%s' '42' > "${TGBOTS_SRC}"
+TGBOTS_DST="$(mktemp)"
+rm "${TGBOTS_DST}"
+MOCKS_CURL_DST='{"ok":true}'
 MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
 rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
-
 MOCKS_CURL_FORMS_PATH="$(mktemp)"
 rm "${MOCKS_CURL_FORMS_PATH}"
+EXPECTED_FORM_STRINGS="chat_id=${TGBOTS_CHAT_ID}"
+PATH="${mocks}/curl/bin:${PATH}" \
+ MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+ MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
+ MOCKS_CURL_FORMS_PATH="${MOCKS_CURL_FORMS_PATH}" \
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/empty.sh "${STDERR}"
+. $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
+. $asserts/files/equals.sh "${MOCKS_CURL_FORM_STRINGS_PATH}" "${EXPECTED_FORM_STRINGS}"$'\n'
+. $asserts/files/equals.sh "${MOCKS_CURL_FORMS_PATH}" "document=@\"${TGBOTS_SRC}\""$'\n'
+rm "${TGBOTS_SRC}"
+rm "${TGBOTS_DST}"
+rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+rm "${MOCKS_CURL_FORMS_PATH}"
 
-EXPECTED_FORM_STRINGS="chat_id=${TGBOTS_CHAT_ID}
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+printf '%s' '42' > "${TGBOTS_SRC}"
+TGBOTS_DST="$(mktemp)"
+rm "${TGBOTS_DST}"
+MOCKS_CURL_DST='{"ok":true}'
+MOCKS_CURL_FORM_STRINGS_PATH="$(mktemp)"
+rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+MOCKS_CURL_FORMS_PATH="$(mktemp)"
+rm "${MOCKS_CURL_FORMS_PATH}"
+EXPECTED_FORM_STRINGS="\
+chat_id=${TGBOTS_CHAT_ID}
 caption=${TGBOTS_MESSAGE}
 parse_mode=Markdown"
-:> "${STDERR}"
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":true}' \
+ MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
  MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
  MOCKS_CURL_FORMS_PATH="${MOCKS_CURL_FORMS_PATH}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
-. $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
-. $asserts/files/not_empty.sh "${TGBOTS_DST}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORM_STRINGS_PATH}")" "${EXPECTED_FORM_STRINGS}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORMS_PATH}")" "document=@\"${TGBOTS_SRC}\""
-rm "${TGBOTS_DST}"
-rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
-rm "${MOCKS_CURL_FORMS_PATH}"
-
-TGBOTS_MESSAGE=''
-
-:> "${STDERR}"
-PATH="${mocks}/curl/bin:${PATH}" \
- MOCKS_CURL_HTTP_CODE=200 \
- MOCKS_CURL_DST='{"ok":true}' \
- MOCKS_CURL_FORM_STRINGS_PATH="${MOCKS_CURL_FORM_STRINGS_PATH}" \
- MOCKS_CURL_FORMS_PATH="${MOCKS_CURL_FORMS_PATH}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
-. $asserts/strings/empty.sh "${SCRIPT}" "$(<"${STDERR}")"
-. $asserts/files/not_empty.sh "${TGBOTS_DST}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${TGBOTS_DST}")" '{"ok":true}'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORM_STRINGS_PATH}")" "chat_id=${TGBOTS_CHAT_ID}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${MOCKS_CURL_FORMS_PATH}")" "document=@\"${TGBOTS_SRC}\""
-rm "${TGBOTS_DST}"
-rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
-rm "${MOCKS_CURL_FORMS_PATH}"
-
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/empty.sh "${STDERR}"
+. $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
+. $asserts/files/equals.sh "${MOCKS_CURL_FORM_STRINGS_PATH}" "${EXPECTED_FORM_STRINGS}"$'\n'
+. $asserts/files/equals.sh "${MOCKS_CURL_FORMS_PATH}" "document=@\"${TGBOTS_SRC}\""$'\n'
 rm "${TGBOTS_SRC}"
+rm "${TGBOTS_DST}"
+rm "${MOCKS_CURL_FORM_STRINGS_PATH}"
+rm "${MOCKS_CURL_FORMS_PATH}"
+
+#
+
+rm "${STDOUT}"
 rm "${STDERR}"
