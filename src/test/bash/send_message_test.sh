@@ -381,9 +381,11 @@ TGBOTS_CHAT_ID='1'
 TGBOTS_MESSAGE='foobarbaz'
 TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
+MOCKS_CURL_DATA_PATH="$(mktemp)"
 MOCKS_CURL_DST='{"ok":true}'
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
+ MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
@@ -391,6 +393,8 @@ PATH="${mocks}/curl/bin:${PATH}" \
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/empty.sh "${STDERR}"
 . $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
 rm "${TGBOTS_DST}"
 
 #
