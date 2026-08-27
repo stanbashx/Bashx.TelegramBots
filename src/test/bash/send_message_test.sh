@@ -303,8 +303,8 @@ PATH="${mocks}/curl/bin:${PATH}" \
 . $asserts/files/equals.sh "${STDERR}" 'Request error!'$'\n'
 rm -f "${TGBOTS_DST}"
 
-HTTP_CODES=(2 20 22 202 2000 401 403 429 500 '' 'foo' '-1' '200 ' ' 200' $'\n200' $'\t200')
-for HTTP_CODE in "${HTTP_CODES[@]}"; do
+VALUES=(2 20 22 202 2000 401 403 429 500 '' 'foo' '-1' '200 ' ' 200' $'\n200' $'\t200')
+for VALUE in "${VALUES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
@@ -315,7 +315,7 @@ for HTTP_CODE in "${HTTP_CODES[@]}"; do
  TGBOTS_DST="$(mktemp)"
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE="${HTTP_CODE}" \
+  MOCKS_CURL_HTTP_CODE="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -327,7 +327,7 @@ done
 #
 
 VALUES=('foo' '{}0' '[]' 'null' '42')
-for MOCKS_CURL_DST in "${VALUES[@]}"; do
+for VALUE in "${VALUES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
@@ -339,7 +339,7 @@ for MOCKS_CURL_DST in "${VALUES[@]}"; do
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
-  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  MOCKS_CURL_DST="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -349,7 +349,7 @@ for MOCKS_CURL_DST in "${VALUES[@]}"; do
 done
 
 VALUES=('{}' '{"ok":null}' '{"ok":{}}' '{"ok":[]}' '{"ok":0}' '{"ok":1}' '{"ok":-1}' '{"ok":""}' '{"ok":"true"}' '{"ok":false}')
-for MOCKS_CURL_DST in "${VALUES[@]}"; do
+for VALUE in "${VALUES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
@@ -361,7 +361,7 @@ for MOCKS_CURL_DST in "${VALUES[@]}"; do
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
-  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
+  MOCKS_CURL_DST="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
   "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
@@ -395,6 +395,7 @@ PATH="${mocks}/curl/bin:${PATH}" \
 . $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
+rm "${MOCKS_CURL_DATA_PATH}"
 rm "${TGBOTS_DST}"
 
 #
