@@ -227,20 +227,20 @@ PATH="${mocks}/curl/bin:${PATH}" \
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 VALUES=('foo' '{}0' '[]' 'null' '42')
 for MOCKS_CURL_DST in "${VALUES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
  TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
  TGBOTS_DST="$(mktemp)"
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
+  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" $'Parse dst error!\n'
@@ -253,12 +253,14 @@ for MOCKS_CURL_DST in "${VALUES[@]}"; do
  :> "${STDERR}"
  TGBOTS_BOT_ID='12345678'
  TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
  TGBOTS_DST="$(mktemp)"
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
+  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" $'Check dst error!\n'
@@ -269,13 +271,15 @@ done
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
 TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
 MOCKS_CURL_DST='{"ok":true}'
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_DST}" >"${STDOUT}" 2>"${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/empty.sh "${STDERR}"
