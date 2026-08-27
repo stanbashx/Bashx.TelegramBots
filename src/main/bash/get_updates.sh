@@ -4,18 +4,26 @@ if [[ $# -ne 3 ]]; then
  echo 'Wrong arguments!' >&2; exit 1; fi
 
 TGBOTS_BOT_ID="$1"
-TGBOTS_BOT_SECRET="$2"
-TGBOTS_DST="$3"
 
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
  echo 'No bot id!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
  echo 'Wrong bot id!' >&2; exit 1
-elif [[ -z "${TGBOTS_BOT_SECRET}" ]]; then
+fi
+
+TGBOTS_BOT_SECRET_SRC="$2"
+
+if [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+ echo 'Wrong bot secret src!' >&2; exit 1
+elif [[ ! -v "${TGBOTS_BOT_SECRET_SRC}" ]]; then
+ echo 'Bot secret is unset!' >&2; exit 1
+elif [[ -z "${!TGBOTS_BOT_SECRET_SRC}" ]]; then
  echo 'No bot secret!' >&2; exit 1
-elif [[ ! "${TGBOTS_BOT_SECRET}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
+elif [[ ! "${!TGBOTS_BOT_SECRET_SRC}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
  echo 'Wrong bot secret!' >&2; exit 1
 fi
+
+TGBOTS_DST="$3"
 
 if [[ -z "${TGBOTS_DST}" ]]; then
  echo 'No dst!' >&2; exit 1
@@ -29,12 +37,12 @@ elif [[ -e "${TGBOTS_DST}" ]]; then
  fi
 fi
 
-TGBOTS_URL="https://api.telegram.org/bot${TGBOTS_BOT_ID}:${TGBOTS_BOT_SECRET}"
+TGBOTS_URL='https://api.telegram.org'
 
 # https://core.telegram.org/bots/api#getUpdates
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
- "${TGBOTS_URL}/getUpdates" \
+ -K <(printf 'url="%s/bot%s:%s/getUpdates"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
  -o "${TGBOTS_DST}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
