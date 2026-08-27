@@ -35,11 +35,8 @@ fi
 
 TGBOTS_MESSAGE="$4"
 
-if [[ -z "${TGBOTS_MESSAGE}" ]]; then
- echo 'No message!' >&2; exit 1
-elif [[ "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
- echo 'Wrong message size!' >&2; exit 1
-fi
+if [[ "${#TGBOTS_MESSAGE}" -gt 1024 ]]; then
+ echo 'Wrong message size!' >&2; exit 1; fi
 
 TGBOTS_SRC="$5"
 
