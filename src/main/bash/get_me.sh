@@ -4,6 +4,7 @@ if [[ $# -ne 3 ]]; then
  echo 'Wrong arguments!' >&2; exit 1; fi
 
 TGBOTS_BOT_ID="$1"
+
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
  echo 'No bot id!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
