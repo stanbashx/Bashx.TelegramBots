@@ -254,7 +254,7 @@ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" "\"${TGBOTS_SRC}\" is empty!"$'\n'
-rm -f "${TGBOTS_SRC}"
+rm "${TGBOTS_SRC}"
 
 :> "${STDOUT}"
 :> "${STDERR}"
@@ -271,56 +271,70 @@ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" "\"${TGBOTS_SRC}\" does not exist!"$'\n'
-rm -f "${TGBOTS_SRC}"
+. $asserts/files/not_exists.sh "${TGBOTS_SRC}"
+
+#
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+printf '%s' '42' > "${TGBOTS_SRC}"
+TGBOTS_DST=''
+PATH="${mocks}/stat/bin:${PATH}" \
+ MOCKS_STAT_EXIT_CODE=1 \
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'Get file size error!'$'\n'
+rm "${TGBOTS_SRC}"
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+printf '%s' '42' > "${TGBOTS_SRC}"
+TGBOTS_DST=''
+PATH="${mocks}/stat/bin:${PATH}" \
+ MOCKS_STAT_SIZE='foo' \
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'Get file size error!'$'\n'
+rm "${TGBOTS_SRC}"
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE='foobarbaz'
+TGBOTS_SRC="$(mktemp)"
+printf '%s' '42' > "${TGBOTS_SRC}"
+TGBOTS_DST=''
+PATH="${mocks}/stat/bin:${PATH}" \
+ MOCKS_STAT_SIZE=32000001 \
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" "\"${TGBOTS_SRC}\" has wrong size!"$'\n'
+rm "${TGBOTS_SRC}"
 
 #
 
 echo 'Not implemented!'; exit 1 # todo
-
-:> "${STDERR}"
-TGBOTS_SRC="$(mktemp)"
-rm "${TGBOTS_SRC}"
-ln -s "${TGBOTS_SRC}" "${TGBOTS_SRC}"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_SRC}\" is a symlink!"
-rm "${TGBOTS_SRC}"
-
-:> "${STDERR}"
-TGBOTS_SRC="$(mktemp)"
-rm "${TGBOTS_SRC}"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_SRC}\" does not exist!"
-
-:> "${STDERR}"
-TGBOTS_SRC="$(mktemp -d)"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_SRC}\" is not a file!"
-rm -rf "${TGBOTS_SRC}"
-
-:> "${STDERR}"
-TGBOTS_SRC="$(mktemp)"
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" "\"${TGBOTS_SRC}\" is empty!"
-
-printf 'foo' > "${TGBOTS_SRC}"
-
-:> "${STDERR}"
-PATH="${mocks}/stat/bin:${PATH}" \
- MOCKS_STAT_EXIT_CODE=1 \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
-
-:> "${STDERR}"
-PATH="${mocks}/stat/bin:${PATH}" \
- MOCKS_STAT_SIZE='foo' \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_SRC}" '' 2>"${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/strings/eq.sh "${SCRIPT}" "$(<"${STDERR}")" 'Get file size error!'
 
 :> "${STDERR}"
 PATH="${mocks}/stat/bin:${PATH}" \
