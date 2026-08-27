@@ -62,6 +62,17 @@ for TGBOTS_BOT_ID in "${TGBOTS_BOT_IDS[@]}"; do
  . $asserts/files/equals.sh "${STDERR}" $'Wrong bot id!\n'
 done
 
+TGBOTS_BOT_SECRET_SOURCES=('' $'\t' $'\n' '-TGBOTS_BOT_SECRET' '42TGBOTS_BOT_SECRET' 'TGBOTS+BOT_SECRET')
+for TGBOTS_BOT_SECRET_SRC in "${TGBOTS_BOT_SECRET_SOURCES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" '' >"${STDOUT}" 2>"${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" 'Wrong bot secret src!'$'\n'
+done
+
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
