@@ -51,7 +51,7 @@ STDERR="$(mktemp)"
 
 :> "${STDOUT}"
 :> "${STDERR}"
-"${SCRIPT}" '' '' '' '' '' '' > "${STDOUT}" 2> "${STDERR}"
+"${SCRIPT}" '' '' '' '' '' '' '' > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
@@ -188,6 +188,39 @@ for VALUE in "${VALUES[@]}"; do
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Wrong chat id!'$'\n'
+done
+
+#
+
+:> "${STDOUT}"
+:> "${STDERR}"
+TGBOTS_BOT_ID='12345678'
+TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+TGBOTS_CHAT_ID='1'
+TGBOTS_MESSAGE=''
+TGBOTS_DST=''
+TGBOTS_TOPIC_ID=''
+"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'No topic id!'$'\n'
+
+VALUES=('a' '0' '-0' '1a')
+for VALUE in "${VALUES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+ TGBOTS_CHAT_ID='1'
+ TGBOTS_MESSAGE=''
+ TGBOTS_DST=''
+ TGBOTS_TOPIC_ID="${VALUE}"
+ "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" 'Wrong topic id!'$'\n'
 done
 
 #
