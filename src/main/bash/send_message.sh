@@ -1,10 +1,17 @@
 #!/usr/local/bin/bash
 
-if [[ $# -ne 5 ]]; then
- echo 'Wrong arguments!' >&2; exit 1; fi
+if [[ $# -eq 6 ]]; then
+ TGBOTS_TOPIC_ID="$6"
+ if [[ -z "${TGBOTS_TOPIC_ID}" ]]; then
+  echo 'No topic id!' >&2; exit 1
+ elif [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
+  echo 'Wrong topic id!' >&2; exit 1
+ fi
+elif [[ $# -ne 5 ]]; then
+ echo 'Wrong arguments!' >&2; exit 1
+fi
 
 TGBOTS_BOT_ID="$1"
-
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
  echo 'No bot id!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
@@ -12,7 +19,6 @@ elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
 fi
 
 TGBOTS_BOT_SECRET_SRC="$2"
-
 if [[ -z "${TGBOTS_BOT_SECRET_SRC}" ]]; then
  echo 'No bot secret src!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
@@ -26,7 +32,6 @@ elif [[ ! "${!TGBOTS_BOT_SECRET_SRC}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
 fi
 
 TGBOTS_CHAT_ID="$3"
-
 if [[ -z "${TGBOTS_CHAT_ID}" ]]; then
  echo 'No chat id!' >&2; exit 1
 elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
@@ -63,6 +68,11 @@ TGBOTS_REQUEST_BODY="{
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
  yq -M -I=0 -p=json -o=json '.text=strenv(STR_VALUE)')"
+
+if [[ -n "${TGBOTS_TOPIC_ID}" ]]; then
+ TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
+  yq -M -I=0 -p=json -o=json ".message_thread_id=${TGBOTS_TOPIC_ID}")"
+fi
 
 TGBOTS_URL='https://api.telegram.org'
 
