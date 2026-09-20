@@ -32,7 +32,10 @@ fi
 
 TGBOTS_TOPIC_NAME="$4"
 if [[ -z "${TGBOTS_TOPIC_NAME}" ]]; then
- echo 'No topic name!' >&2; exit 1; fi
+ echo 'No topic name!' >&2; exit 1
+elif [[ "${#TGBOTS_TOPIC_NAME}" -gt 128 ]]; then
+ echo 'Wrong topic name size!' >&2; exit 1
+fi
 
 TGBOTS_DST="$5"
 if [[ -z "${TGBOTS_DST}" ]]; then
