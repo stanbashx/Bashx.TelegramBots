@@ -89,3 +89,7 @@ if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
 TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
 if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
  echo 'Check dst error!' >&2; exit 1; fi
+
+TGBOTS_TOPIC_ID="$(yq -M -p=json -o=json '.result.message_thread_id // ""' "${TGBOTS_DST}" 2>/dev/null)"
+if [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
+ echo 'Check topic error!' >&2; exit 1; fi
