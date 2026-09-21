@@ -206,8 +206,6 @@ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'Wrong topic name size!'$'\n'
 
-echo 'Not implemented!'; exit 1 # todo
-
 #
 
 :> "${STDOUT}"
@@ -357,6 +355,40 @@ for VALUE in "${VALUES[@]}"; do
  . $asserts/files/equals.sh "${STDERR}" 'Check dst error!'$'\n'
  rm "${TGBOTS_DST}"
 done
+
+VALUES=(
+ '{"ok":true}'
+ '{"ok":true,"result":{}}'
+ '{"ok":true,"result":{"message_thread_id":null}}'
+ '{"ok":true,"result":{"message_thread_id":0}}'
+ '{"ok":true,"result":{"message_thread_id":-1}}'
+ '{"ok":true,"result":{"message_thread_id":"foo"}}'
+ '{"ok":true,"result":{"message_thread_id":true}}'
+ '{"ok":true,"result":{"message_thread_id":{}}}'
+ '{"ok":true,"result":{"message_thread_id":[]}}'
+)
+for VALUE in "${VALUES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID='12345678'
+ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
+ TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
+ TGBOTS_CHAT_ID='1'
+ TGBOTS_TOPIC_NAME='foobarbaz'
+ TGBOTS_DST="$(mktemp)"
+ rm "${TGBOTS_DST}"
+ PATH="${mocks}/curl/bin:${PATH}" \
+  MOCKS_CURL_HTTP_CODE=200 \
+  MOCKS_CURL_DST="${VALUE}" \
+  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" 'Check topic error!'$'\n'
+ rm "${TGBOTS_DST}"
+done
+
+echo 'Not implemented!'; exit 1 # todo
 
 #
 
