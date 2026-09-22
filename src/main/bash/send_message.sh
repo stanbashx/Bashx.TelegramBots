@@ -7,8 +7,9 @@ unset TGBOTS_TOPIC_ID
 unset TGBOTS_MESSAGE
 unset TGBOTS_DST
 unset TGBOTS_PARSE_MODE
+unset TGBOTS_HTTP_CODE
 
-while [[ $# -gt 1 ]]; do
+while [[ $# -gt 0 ]]; do
  case "$1" in
   '--bot_id')
    if [[ -v TGBOTS_BOT_ID ]]; then
@@ -38,6 +39,10 @@ while [[ $# -gt 1 ]]; do
    if [[ -v TGBOTS_PARSE_MODE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_PARSE_MODE="$2"; shift 2;;
+  '--http_code')
+   if [[ -v TGBOTS_HTTP_CODE ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_HTTP_CODE="$2"; shift 2;;
   *) echo "\"$1\" is not supported!" >&2; exit 1;;
  esac
 done
@@ -97,14 +102,20 @@ fi
 if [[ -v TGBOTS_PARSE_MODE ]]; then
  case "${TGBOTS_PARSE_MODE}" in
   'Markdown');;
-  '') echo 'No parse mode id!' >&2; exit 1;;
+  '') echo 'No parse mode!' >&2; exit 1;;
   *) echo "\"${TGBOTS_PARSE_MODE}\" is not supported!" >&2; exit 1;;
  esac
 fi
 
-TGBOTS_REQUEST_BODY="{
-\"chat_id\":${TGBOTS_CHAT_ID},
-\"link_preview_options\":{\"is_disabled\":true}}"
+if [[ -v TGBOTS_HTTP_CODE ]]; then
+ case "${TGBOTS_HTTP_CODE}" in
+  '200');;
+  '') echo 'No http code!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_HTTP_CODE}\" is not supported!" >&2; exit 1;;
+ esac
+fi
+
+TGBOTS_REQUEST_BODY="{\"chat_id\":${TGBOTS_CHAT_ID},\"link_preview_options\":{\"is_disabled\":true}}"
 
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
@@ -131,11 +142,13 @@ HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  --data "${TGBOTS_REQUEST_BODY}" \
  -o /dev/null 2>/dev/null)
 
-#if [[ $? -ne 0 ]]; then
-# echo 'Request error!' >&2; exit 1; fi
+if [[ $? -ne 0 ]]; then
+ echo 'Request error!' >&2; exit 1; fi
 
-#if [[ "${HTTP_CODE}" != '200' ]]; then
-# echo 'Code error!' >&2; exit 1; fi
+if [[ -v TGBOTS_HTTP_CODE ]]; then
+ if [[ "${HTTP_CODE}" != "${TGBOTS_HTTP_CODE}" ]]; then
+  echo 'Code error!' >&2; exit 1; fi
+fi
 
 #if [[ -L "${TGBOTS_DST}" ]]; then
 # echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
