@@ -10,6 +10,8 @@ unset TGBOTS_PARSE_MODE
 unset TGBOTS_HTTP_CODE
 
 while [[ $# -gt 0 ]]; do
+ if [[ $# -lt 2 ]]; then
+  echo 'Wrong flags!' >&2; exit 1; fi
  case "$1" in
   '--bot_id')
    if [[ -v TGBOTS_BOT_ID ]]; then
