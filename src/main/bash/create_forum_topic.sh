@@ -1,15 +1,7 @@
 #!/usr/local/bin/bash
 
-if [[ $# -eq 6 ]]; then
- TGBOTS_TOPIC_ID="$6"
- if [[ -z "${TGBOTS_TOPIC_ID}" ]]; then
-  echo 'No topic id!' >&2; exit 1
- elif [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
-  echo 'Wrong topic id!' >&2; exit 1
- fi
-elif [[ $# -ne 5 ]]; then
- echo 'Wrong arguments!' >&2; exit 1
-fi
+if [[ $# -ne 5 ]]; then
+ echo 'Wrong arguments!' >&2; exit 1; fi
 
 TGBOTS_BOT_ID="$1"
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
@@ -38,16 +30,14 @@ elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
  echo 'Wrong chat id!' >&2; exit 1
 fi
 
-TGBOTS_MESSAGE="$4"
-
-if [[ -z "${TGBOTS_MESSAGE}" ]]; then
- echo 'No message!' >&2; exit 1
-elif [[ "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
- echo 'Wrong message size!' >&2; exit 1
+TGBOTS_TOPIC_NAME="$4"
+if [[ -z "${TGBOTS_TOPIC_NAME}" ]]; then
+ echo 'No topic name!' >&2; exit 1
+elif [[ "${#TGBOTS_TOPIC_NAME}" -gt 128 ]]; then
+ echo 'Wrong topic name size!' >&2; exit 1
 fi
 
 TGBOTS_DST="$5"
-
 if [[ -z "${TGBOTS_DST}" ]]; then
  echo 'No dst!' >&2; exit 1
 elif [[ -L "${TGBOTS_DST}" ]]; then
@@ -60,26 +50,18 @@ elif [[ -e "${TGBOTS_DST}" ]]; then
  fi
 fi
 
-TGBOTS_REQUEST_BODY="{
-\"chat_id\":${TGBOTS_CHAT_ID},
-\"parse_mode\":\"Markdown\",
-\"link_preview_options\":{\"is_disabled\":true}}"
+TGBOTS_REQUEST_BODY="{\"chat_id\":${TGBOTS_CHAT_ID}}"
 
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
- STR_VALUE="${TGBOTS_MESSAGE}" \
- yq -M -I=0 -p=json -o=json '.text=strenv(STR_VALUE)')"
-
-if [[ -n "${TGBOTS_TOPIC_ID}" ]]; then
- TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
-  yq -M -I=0 -p=json -o=json ".message_thread_id=${TGBOTS_TOPIC_ID}")"
-fi
+ STR_VALUE="${TGBOTS_TOPIC_NAME}" \
+ yq -M -I=0 -p=json -o=json '.name=strenv(STR_VALUE)')"
 
 TGBOTS_URL='https://api.telegram.org'
 
-# https://core.telegram.org/bots/api#sendmessage
+# https://core.telegram.org/bots/api#createforumtopic
 
 HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
- -K <(printf 'url="%s/bot%s:%s/sendMessage"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
+ -K <(printf 'url="%s/bot%s:%s/createForumTopic"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
  -H 'Content-Type: application/json' \
  --data "${TGBOTS_REQUEST_BODY}" \
  -o "${TGBOTS_DST}" 2>/dev/null)
@@ -107,3 +89,7 @@ if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
 TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
 if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
  echo 'Check dst error!' >&2; exit 1; fi
+
+TGBOTS_TOPIC_ID="$(yq -M -p=json -o=json '.result.message_thread_id // ""' "${TGBOTS_DST}" 2>/dev/null)"
+if [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
+ echo 'Check topic error!' >&2; exit 1; fi
