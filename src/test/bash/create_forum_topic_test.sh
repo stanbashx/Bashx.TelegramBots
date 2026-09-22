@@ -411,8 +411,8 @@ PATH="${mocks}/curl/bin:${PATH}" \
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/empty.sh "${STDERR}"
 . $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .name "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_TOPIC_NAME}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -M -p=json -o=json '.chat_id' "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json '.name' "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_TOPIC_NAME}"
 rm "${MOCKS_CURL_DATA_PATH}"
 rm "${TGBOTS_DST}"
 
