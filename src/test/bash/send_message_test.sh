@@ -16,56 +16,8 @@ STDERR="$(mktemp)"
 
 :> "${STDOUT}"
 :> "${STDERR}"
-"${SCRIPT}" > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-:> "${STDOUT}"
-:> "${STDERR}"
-"${SCRIPT}" '' > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-:> "${STDOUT}"
-:> "${STDERR}"
-"${SCRIPT}" '' '' > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-:> "${STDOUT}"
-:> "${STDERR}"
-"${SCRIPT}" '' '' '' > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-:> "${STDOUT}"
-:> "${STDERR}"
-"${SCRIPT}" '' '' '' '' > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-:> "${STDOUT}"
-:> "${STDERR}"
-"${SCRIPT}" '' '' '' '' '' '' '' > "${STDOUT}" 2> "${STDERR}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
-. $asserts/files/empty.sh "${STDOUT}"
-. $asserts/files/equals.sh "${STDERR}" 'Wrong arguments!'$'\n'
-
-#
-
-:> "${STDOUT}"
-:> "${STDERR}"
 TGBOTS_BOT_ID=''
-TGBOTS_BOT_SECRET_SRC=''
-TGBOTS_CHAT_ID=''
-TGBOTS_MESSAGE=''
-TGBOTS_DST=''
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+"${SCRIPT}" -b "${TGBOTS_BOT_ID}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'No bot id!'$'\n'
@@ -75,17 +27,15 @@ for VALUE in "${VALUES[@]}"; do
  :> "${STDOUT}"
  :> "${STDERR}"
  TGBOTS_BOT_ID="${VALUE}"
- TGBOTS_BOT_SECRET_SRC=''
- TGBOTS_CHAT_ID=''
- TGBOTS_MESSAGE=''
- TGBOTS_DST=''
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Wrong bot id!'$'\n'
 done
 
 #
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDOUT}"
 :> "${STDERR}"
