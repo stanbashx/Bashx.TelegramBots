@@ -180,8 +180,6 @@ rm "${TGBOTS_DST}"
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
@@ -189,16 +187,13 @@ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
 TGBOTS_CHAT_ID='1'
 TGBOTS_TOPIC_NAME='foobarbaz'
-TGBOTS_DST="$(mktemp)"
-rm "${TGBOTS_DST}"
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_EXIT_CODE=1 \
  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -n "${TGBOTS_TOPIC_NAME}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'Request error!'$'\n'
-rm -f "${TGBOTS_DST}"
 
 VALUES=(2 20 22 202 2000 401 403 429 500 '' 'foo' '-1' '200 ' ' 200' $'\n200' $'\t200')
 for VALUE in "${VALUES[@]}"; do
@@ -209,19 +204,18 @@ for VALUE in "${VALUES[@]}"; do
  TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
  TGBOTS_CHAT_ID='1'
  TGBOTS_TOPIC_NAME='foobarbaz'
- TGBOTS_DST="$(mktemp)"
- rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
   MOCKS_CURL_HTTP_CODE="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+  "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -n "${TGBOTS_TOPIC_NAME}" -h 200 > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Code error!'$'\n'
- rm -f "${TGBOTS_DST}"
 done
 
 #
+
+echo 'Not implemented!'; exit 1 # todo
 
 VALUES=('foo' '{}0' '[]' 'null' '42')
 for VALUE in "${VALUES[@]}"; do
