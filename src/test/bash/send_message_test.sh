@@ -290,8 +290,6 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
@@ -308,13 +306,13 @@ PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -m "${TGBOTS_MESSAGE}" -h 200 -d "${TGBOTS_DST}" -C 'true' > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/empty.sh "${STDERR}"
 . $asserts/files/equals.sh "${TGBOTS_DST}" "${MOCKS_CURL_DST}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .chat_id "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
-. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json .text "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -M -p=json -o=json '.chat_id' "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_CHAT_ID}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$(yq -Mr -p=json -o=json '.text' "${MOCKS_CURL_DATA_PATH}")" "${TGBOTS_MESSAGE}"
 rm "${MOCKS_CURL_DATA_PATH}"
 rm "${TGBOTS_DST}"
 
