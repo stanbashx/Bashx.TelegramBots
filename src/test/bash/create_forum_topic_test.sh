@@ -215,8 +215,6 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 VALUES=('foo' '{}0' '[]' 'null' '42')
 for VALUE in "${VALUES[@]}"; do
  :> "${STDOUT}"
@@ -229,10 +227,9 @@ for VALUE in "${VALUES[@]}"; do
  TGBOTS_DST="$(mktemp)"
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+  "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -n "${TGBOTS_TOPIC_NAME}" -d "${TGBOTS_DST}" -C 'true' > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Parse dst error!'$'\n'
@@ -251,15 +248,18 @@ for VALUE in "${VALUES[@]}"; do
  TGBOTS_DST="$(mktemp)"
  rm "${TGBOTS_DST}"
  PATH="${mocks}/curl/bin:${PATH}" \
-  MOCKS_CURL_HTTP_CODE=200 \
   MOCKS_CURL_DST="${VALUE}" \
   TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
-  "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+  "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -n "${TGBOTS_TOPIC_NAME}" -d "${TGBOTS_DST}" -C 'true' > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Check dst error!'$'\n'
  rm "${TGBOTS_DST}"
 done
+
+#
+
+echo 'Not implemented!'; exit 1 # todo
 
 VALUES=(
  '{"ok":true}'
