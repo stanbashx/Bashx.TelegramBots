@@ -290,8 +290,6 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
@@ -302,13 +300,13 @@ TGBOTS_TOPIC_NAME='foobarbaz'
 TGBOTS_DST="$(mktemp)"
 rm "${TGBOTS_DST}"
 MOCKS_CURL_DATA_PATH="$(mktemp)"
-MOCKS_CURL_DST='{"ok":true,"result":{"message_thread_id":1}}'
+MOCKS_CURL_DST='{"ok":true,"result":{"message_thread_id":2}}'
 PATH="${mocks}/curl/bin:${PATH}" \
  MOCKS_CURL_HTTP_CODE=200 \
  MOCKS_CURL_DATA_PATH="${MOCKS_CURL_DATA_PATH}" \
  MOCKS_CURL_DST="${MOCKS_CURL_DST}" \
  TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_TOPIC_NAME}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -n "${TGBOTS_TOPIC_NAME}" -h 200 -d "${TGBOTS_DST}" -C 'true' > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '0'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/empty.sh "${STDERR}"
