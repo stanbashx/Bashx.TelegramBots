@@ -8,6 +8,7 @@ unset TGBOTS_MESSAGE
 unset TGBOTS_DST
 unset TGBOTS_PARSE_MODE
 unset TGBOTS_HTTP_CODE
+unset TGBOTS_CHECKS
 
 while [[ $# -gt 0 ]]; do
  if [[ $# -lt 2 ]]; then
@@ -33,10 +34,14 @@ while [[ $# -gt 0 ]]; do
    if [[ -v TGBOTS_MESSAGE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_MESSAGE="$2"; shift 2;;
-  '--dst')
+  '--destination')
    if [[ -v TGBOTS_DST ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_DST="$2"; shift 2;;
+  '--checks')
+   if [[ -v TGBOTS_CHECKS ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_CHECKS="$2"; shift 2;;
   '--parse_mode')
    if [[ -v TGBOTS_PARSE_MODE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
@@ -87,6 +92,14 @@ elif [[ "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
  echo 'Wrong message size!' >&2; exit 1
 fi
 
+if [[ -v TGBOTS_CHECKS ]]; then
+ case "${TGBOTS_CHECKS}" in
+  'true');;
+  '') echo 'No checks!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_CHECKS}\" is not supported!" >&2; exit 1;;
+ esac
+fi
+
 if [[ -v TGBOTS_DST ]]; then
  if [[ -z "${TGBOTS_DST}" ]]; then
   echo 'No dst!' >&2; exit 1
@@ -99,6 +112,10 @@ if [[ -v TGBOTS_DST ]]; then
    echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
   fi
  fi
+elif [[ "${TGBOTS_CHECKS}" == 'true' ]]; then
+ TGBOTS_DST="$(mktemp)"
+else
+ TGBOTS_DST='/dev/null'
 fi
 
 if [[ -v TGBOTS_PARSE_MODE ]]; then
@@ -142,7 +159,7 @@ HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  -K <(printf 'url="%s/bot%s:%s/sendMessage"' "${TGBOTS_URL}" "${TGBOTS_BOT_ID}" "${!TGBOTS_BOT_SECRET_SRC}") \
  -H 'Content-Type: application/json' \
  --data "${TGBOTS_REQUEST_BODY}" \
- -o /dev/null 2>/dev/null)
+ -o "${TGBOTS_DST}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
  echo 'Request error!' >&2; exit 1; fi
@@ -152,20 +169,20 @@ if [[ -v TGBOTS_HTTP_CODE ]]; then
   echo 'Code error!' >&2; exit 1; fi
 fi
 
-#if [[ -L "${TGBOTS_DST}" ]]; then
-# echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
-#elif [[ ! -e "${TGBOTS_DST}" ]]; then
-# echo "\"${TGBOTS_DST}\" does not exist!" >&2; exit 1
-#elif [[ ! -f "${TGBOTS_DST}" ]]; then
-# echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
-#elif [[ ! -s "${TGBOTS_DST}" ]]; then
-# echo "\"${TGBOTS_DST}\" is empty!" >&2; exit 1
-#fi
-
-#TGBOTS_DST_TAGS="$(yq -Mer -p=json -o=json 'tag' "${TGBOTS_DST}" 2>/dev/null)"
-#if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
-# echo 'Parse dst error!' >&2; exit 1; fi
-
-#TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
-#if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
-# echo 'Check dst error!' >&2; exit 1; fi
+if [[ "${TGBOTS_CHECKS}" == 'true' ]]; then
+ if [[ -L "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
+ elif [[ ! -e "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" does not exist!" >&2; exit 1
+ elif [[ ! -f "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
+ elif [[ ! -s "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is empty!" >&2; exit 1
+ fi
+ TGBOTS_DST_TAGS="$(yq -Mer -p=json -o=json 'tag' "${TGBOTS_DST}" 2>/dev/null)"
+ if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
+  echo 'Parse dst error!' >&2; exit 1; fi
+ TGBOTS_DST_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
+ if [[ "${TGBOTS_DST_CHECKS}" != 'true' ]]; then
+  echo 'Check dst error!' >&2; exit 1; fi
+fi
