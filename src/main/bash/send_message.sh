@@ -14,39 +14,39 @@ while [[ $# -gt 0 ]]; do
  if [[ $# -lt 2 ]]; then
   echo 'Wrong flags!' >&2; exit 1; fi
  case "$1" in
-  '--bot_id')
+  '--bot_id'|'-b')
    if [[ -v TGBOTS_BOT_ID ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_BOT_ID="$2"; shift 2;;
-  '--bot_secret_src')
+  '--bot_secret_src'|'-bss')
    if [[ -v TGBOTS_BOT_SECRET_SRC ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_BOT_SECRET_SRC="$2"; shift 2;;
-  '--chat_id')
+  '--chat_id'|'-c')
    if [[ -v TGBOTS_CHAT_ID ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_CHAT_ID="$2"; shift 2;;
-  '--topic_id')
+  '--topic_id'|'-t')
    if [[ -v TGBOTS_TOPIC_ID ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_TOPIC_ID="$2"; shift 2;;
-  '--message')
+  '--message'|'-m')
    if [[ -v TGBOTS_MESSAGE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_MESSAGE="$2"; shift 2;;
-  '--destination')
+  '--destination'|'-d')
    if [[ -v TGBOTS_DST ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_DST="$2"; shift 2;;
-  '--checks')
+  '--checks'|'-C')
    if [[ -v TGBOTS_CHECKS ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_CHECKS="$2"; shift 2;;
-  '--parse_mode')
+  '--parse_mode'|'-p')
    if [[ -v TGBOTS_PARSE_MODE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_PARSE_MODE="$2"; shift 2;;
-  '--http_code')
+  '--http_code'|'-h')
    if [[ -v TGBOTS_HTTP_CODE ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_HTTP_CODE="$2"; shift 2;;
