@@ -6,6 +6,7 @@ unset TGBOTS_CHAT_ID
 unset TGBOTS_TOPIC_ID
 unset TGBOTS_MESSAGE
 unset TGBOTS_DST
+unset TGBOTS_PARSE_MODE
 
 while [[ $# -gt 1 ]]; do
  case "$1" in
@@ -33,7 +34,11 @@ while [[ $# -gt 1 ]]; do
    if [[ -v TGBOTS_DST ]]; then
     echo "\"$1\" already used!" >&2; exit 1; fi
    TGBOTS_DST="$2"; shift 2;;
-  *) shift;;
+  '--parse_mode')
+   if [[ -v TGBOTS_PARSE_MODE ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_PARSE_MODE="$2"; shift 2;;
+  *) echo "\"$1\" is not supported!" >&2; exit 1;;
  esac
 done
 
@@ -89,9 +94,16 @@ if [[ -v TGBOTS_DST ]]; then
  fi
 fi
 
+if [[ -v TGBOTS_PARSE_MODE ]]; then
+ case "${TGBOTS_PARSE_MODE}" in
+  'Markdown');;
+  '') echo 'No parse mode id!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_PARSE_MODE}\" is not supported!" >&2; exit 1;;
+ esac
+fi
+
 TGBOTS_REQUEST_BODY="{
 \"chat_id\":${TGBOTS_CHAT_ID},
-\"parse_mode\":\"Markdown\",
 \"link_preview_options\":{\"is_disabled\":true}}"
 
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
@@ -101,6 +113,12 @@ TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
 if [[ -v TGBOTS_TOPIC_ID ]]; then
  TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
   yq -M -I=0 -p=json -o=json ".message_thread_id=${TGBOTS_TOPIC_ID}")"
+fi
+
+if [[ -v TGBOTS_PARSE_MODE ]]; then
+ TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
+  STR_VALUE="${TGBOTS_PARSE_MODE}" \
+  yq -M -I=0 -p=json -o=json '.parse_mode=strenv(STR_VALUE)')"
 fi
 
 TGBOTS_URL='https://api.telegram.org'
