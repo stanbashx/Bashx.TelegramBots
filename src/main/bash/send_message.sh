@@ -1,24 +1,65 @@
 #!/usr/local/bin/bash
 
-if [[ $# -eq 6 ]]; then
- TGBOTS_TOPIC_ID="$6"
- if [[ -z "${TGBOTS_TOPIC_ID}" ]]; then
-  echo 'No topic id!' >&2; exit 1
- elif [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
-  echo 'Wrong topic id!' >&2; exit 1
- fi
-elif [[ $# -ne 5 ]]; then
- echo 'Wrong arguments!' >&2; exit 1
-fi
+unset TGBOTS_BOT_ID
+unset TGBOTS_BOT_SECRET_SRC
+unset TGBOTS_CHAT_ID
+unset TGBOTS_CHECKS
+unset TGBOTS_DST
+unset TGBOTS_HTTP_CODE
+unset TGBOTS_MESSAGE
+unset TGBOTS_PARSE_MODE
+unset TGBOTS_TOPIC_ID
 
-TGBOTS_BOT_ID="$1"
+while [[ $# -gt 0 ]]; do
+ if [[ $# -lt 2 ]]; then
+  echo 'Wrong flags!' >&2; exit 1; fi
+ case "$1" in
+  '--bot_id'|'-b')
+   if [[ -v TGBOTS_BOT_ID ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_BOT_ID="$2"; shift 2;;
+  '--bot_secret_src'|'-bss')
+   if [[ -v TGBOTS_BOT_SECRET_SRC ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_BOT_SECRET_SRC="$2"; shift 2;;
+  '--chat_id'|'-c')
+   if [[ -v TGBOTS_CHAT_ID ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_CHAT_ID="$2"; shift 2;;
+  '--topic_id'|'-t')
+   if [[ -v TGBOTS_TOPIC_ID ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_TOPIC_ID="$2"; shift 2;;
+  '--message'|'-m')
+   if [[ -v TGBOTS_MESSAGE ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_MESSAGE="$2"; shift 2;;
+  '--destination'|'-d')
+   if [[ -v TGBOTS_DST ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_DST="$2"; shift 2;;
+  '--checks'|'-C')
+   if [[ -v TGBOTS_CHECKS ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_CHECKS="$2"; shift 2;;
+  '--parse_mode'|'-p')
+   if [[ -v TGBOTS_PARSE_MODE ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_PARSE_MODE="$2"; shift 2;;
+  '--http_code'|'-h')
+   if [[ -v TGBOTS_HTTP_CODE ]]; then
+    echo "\"$1\" already used!" >&2; exit 1; fi
+   TGBOTS_HTTP_CODE="$2"; shift 2;;
+  *) echo "\"$1\" is not supported!" >&2; exit 1;;
+ esac
+done
+
 if [[ -z "${TGBOTS_BOT_ID}" ]]; then
  echo 'No bot id!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_ID}" =~ ^[1-9][0-9]{7,15}$ ]]; then
  echo 'Wrong bot id!' >&2; exit 1
 fi
 
-TGBOTS_BOT_SECRET_SRC="$2"
 if [[ -z "${TGBOTS_BOT_SECRET_SRC}" ]]; then
  echo 'No bot secret src!' >&2; exit 1
 elif [[ ! "${TGBOTS_BOT_SECRET_SRC}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
@@ -31,14 +72,19 @@ elif [[ ! "${!TGBOTS_BOT_SECRET_SRC}" =~ ^[a-zA-Z0-9_-]{35}$ ]]; then
  echo 'Wrong bot secret!' >&2; exit 1
 fi
 
-TGBOTS_CHAT_ID="$3"
 if [[ -z "${TGBOTS_CHAT_ID}" ]]; then
  echo 'No chat id!' >&2; exit 1
 elif [[ ! "${TGBOTS_CHAT_ID}" =~ ^-?[1-9][0-9]*$ ]]; then
  echo 'Wrong chat id!' >&2; exit 1
 fi
 
-TGBOTS_MESSAGE="$4"
+if [[ -v TGBOTS_TOPIC_ID ]]; then
+ if [[ -z "${TGBOTS_TOPIC_ID}" ]]; then
+  echo 'No topic id!' >&2; exit 1
+ elif [[ ! "${TGBOTS_TOPIC_ID}" =~ ^[1-9][0-9]*$ ]]; then
+  echo 'Wrong topic id!' >&2; exit 1
+ fi
+fi
 
 if [[ -z "${TGBOTS_MESSAGE}" ]]; then
  echo 'No message!' >&2; exit 1
@@ -46,32 +92,63 @@ elif [[ "${#TGBOTS_MESSAGE}" -gt 4096 ]]; then
  echo 'Wrong message size!' >&2; exit 1
 fi
 
-TGBOTS_DST="$5"
-
-if [[ -z "${TGBOTS_DST}" ]]; then
- echo 'No dst!' >&2; exit 1
-elif [[ -L "${TGBOTS_DST}" ]]; then
- echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
-elif [[ -e "${TGBOTS_DST}" ]]; then
- if [[ -f "${TGBOTS_DST}" ]]; then
-  echo "\"${TGBOTS_DST}\" exists!" >&2; exit 1
- else
-  echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
- fi
+if [[ -v TGBOTS_CHECKS ]]; then
+ case "${TGBOTS_CHECKS}" in
+  'true');;
+  '') echo 'No checks!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_CHECKS}\" is not supported!" >&2; exit 1;;
+ esac
 fi
 
-TGBOTS_REQUEST_BODY="{
-\"chat_id\":${TGBOTS_CHAT_ID},
-\"parse_mode\":\"Markdown\",
-\"link_preview_options\":{\"is_disabled\":true}}"
+if [[ -v TGBOTS_DST ]]; then
+ if [[ -z "${TGBOTS_DST}" ]]; then
+  echo 'No dst!' >&2; exit 1
+ elif [[ -L "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
+ elif [[ -e "${TGBOTS_DST}" ]]; then
+  if [[ -f "${TGBOTS_DST}" ]]; then
+   echo "\"${TGBOTS_DST}\" exists!" >&2; exit 1
+  else
+   echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
+  fi
+ fi
+elif [[ "${TGBOTS_CHECKS}" == 'true' ]]; then
+ TGBOTS_DST="$(mktemp)"
+else
+ TGBOTS_DST='/dev/null'
+fi
+
+if [[ -v TGBOTS_PARSE_MODE ]]; then
+ case "${TGBOTS_PARSE_MODE}" in
+  'Markdown');;
+  '') echo 'No parse mode!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_PARSE_MODE}\" is not supported!" >&2; exit 1;;
+ esac
+fi
+
+if [[ -v TGBOTS_HTTP_CODE ]]; then
+ case "${TGBOTS_HTTP_CODE}" in
+  '200');;
+  '') echo 'No http code!' >&2; exit 1;;
+  *) echo "\"${TGBOTS_HTTP_CODE}\" is not supported!" >&2; exit 1;;
+ esac
+fi
+
+TGBOTS_REQUEST_BODY="{\"chat_id\":${TGBOTS_CHAT_ID},\"link_preview_options\":{\"is_disabled\":true}}"
 
 TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
  STR_VALUE="${TGBOTS_MESSAGE}" \
  yq -M -I=0 -p=json -o=json '.text=strenv(STR_VALUE)')"
 
-if [[ -n "${TGBOTS_TOPIC_ID}" ]]; then
+if [[ -v TGBOTS_TOPIC_ID ]]; then
  TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
   yq -M -I=0 -p=json -o=json ".message_thread_id=${TGBOTS_TOPIC_ID}")"
+fi
+
+if [[ -v TGBOTS_PARSE_MODE ]]; then
+ TGBOTS_REQUEST_BODY="$(printf '%s' "${TGBOTS_REQUEST_BODY}" | \
+  STR_VALUE="${TGBOTS_PARSE_MODE}" \
+  yq -M -I=0 -p=json -o=json '.parse_mode=strenv(STR_VALUE)')"
 fi
 
 TGBOTS_URL='https://api.telegram.org'
@@ -85,25 +162,27 @@ HTTP_CODE=$(curl -m 8 -w '%{http_code}' \
  -o "${TGBOTS_DST}" 2>/dev/null)
 
 if [[ $? -ne 0 ]]; then
- echo 'Request error!' >&2; exit 1
-elif [[ "${HTTP_CODE}" != '200' ]]; then
- echo 'Code error!' >&2; exit 1
+ echo 'Request error!' >&2; exit 1; fi
+
+if [[ -v TGBOTS_HTTP_CODE ]]; then
+ if [[ "${HTTP_CODE}" != "${TGBOTS_HTTP_CODE}" ]]; then
+  echo 'Code error!' >&2; exit 1; fi
 fi
 
-if [[ -L "${TGBOTS_DST}" ]]; then
- echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
-elif [[ ! -e "${TGBOTS_DST}" ]]; then
- echo "\"${TGBOTS_DST}\" does not exist!" >&2; exit 1
-elif [[ ! -f "${TGBOTS_DST}" ]]; then
- echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
-elif [[ ! -s "${TGBOTS_DST}" ]]; then
- echo "\"${TGBOTS_DST}\" is empty!" >&2; exit 1
+if [[ "${TGBOTS_CHECKS}" == 'true' ]]; then
+ if [[ -L "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is a symlink!" >&2; exit 1
+ elif [[ ! -e "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" does not exist!" >&2; exit 1
+ elif [[ ! -f "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is not a file!" >&2; exit 1
+ elif [[ ! -s "${TGBOTS_DST}" ]]; then
+  echo "\"${TGBOTS_DST}\" is empty!" >&2; exit 1
+ fi
+ TGBOTS_DST_TAGS="$(yq -Mer -p=json -o=json 'tag' "${TGBOTS_DST}" 2>/dev/null)"
+ if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
+  echo 'Parse dst error!' >&2; exit 1; fi
+ TGBOTS_DST_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
+ if [[ "${TGBOTS_DST_CHECKS}" != 'true' ]]; then
+  echo 'Check dst error!' >&2; exit 1; fi
 fi
-
-TGBOTS_DST_TAGS="$(yq -Mer -p=json -o=json 'tag' "${TGBOTS_DST}" 2>/dev/null)"
-if [[ $? -ne 0 || "${TGBOTS_DST_TAGS}" != '!!map' ]]; then
- echo 'Parse dst error!' >&2; exit 1; fi
-
-TGBOTS_CHECKS="$(yq -M -p=json -o=json '.ok // false' "${TGBOTS_DST}" 2>/dev/null)"
-if [[ "${TGBOTS_CHECKS}" != 'true' ]]; then
- echo 'Check dst error!' >&2; exit 1; fi
