@@ -152,8 +152,6 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
@@ -161,9 +159,8 @@ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
 TGBOTS_CHAT_ID='1'
 TGBOTS_MESSAGE=''
-TGBOTS_DST=''
 TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -m "${TGBOTS_MESSAGE}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'No message!'$'\n'
@@ -175,14 +172,15 @@ TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
 TGBOTS_CHAT_ID='1'
 TGBOTS_MESSAGE="$(printf '%.1s' {1..4097})"
-TGBOTS_DST=''
 TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" > "${STDOUT}" 2> "${STDERR}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -m "${TGBOTS_MESSAGE}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'Wrong message size!'$'\n'
 
 #
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDOUT}"
 :> "${STDERR}"
