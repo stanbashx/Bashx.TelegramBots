@@ -16,6 +16,29 @@ STDERR="$(mktemp)"
 
 :> "${STDOUT}"
 :> "${STDERR}"
+TGBOTS_BOT_ID=''
+"${SCRIPT}" -b "${TGBOTS_BOT_ID}" > "${STDOUT}" 2> "${STDERR}"
+. $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+. $asserts/files/empty.sh "${STDOUT}"
+. $asserts/files/equals.sh "${STDERR}" 'No bot id!'$'\n'
+
+VALUES=('a' '1234567' '12345678901234567' '01234567' '123456a')
+for VALUE in "${VALUES[@]}"; do
+ :> "${STDOUT}"
+ :> "${STDERR}"
+ TGBOTS_BOT_ID="${VALUE}"
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" > "${STDOUT}" 2> "${STDERR}"
+ . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
+ . $asserts/files/empty.sh "${STDOUT}"
+ . $asserts/files/equals.sh "${STDERR}" 'Wrong bot id!'$'\n'
+done
+
+#
+
+echo 'Not implemented!'; exit 1 # todo
+
+:> "${STDOUT}"
+:> "${STDERR}"
 "${SCRIPT}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
