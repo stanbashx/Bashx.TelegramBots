@@ -3,12 +3,12 @@
 unset TGBOTS_BOT_ID
 unset TGBOTS_BOT_SECRET_SRC
 unset TGBOTS_CHAT_ID
-unset TGBOTS_TOPIC_ID
-unset TGBOTS_MESSAGE
-unset TGBOTS_DST
-unset TGBOTS_PARSE_MODE
-unset TGBOTS_HTTP_CODE
 unset TGBOTS_CHECKS
+unset TGBOTS_DST
+unset TGBOTS_HTTP_CODE
+unset TGBOTS_MESSAGE
+unset TGBOTS_PARSE_MODE
+unset TGBOTS_TOPIC_ID
 
 while [[ $# -gt 0 ]]; do
  if [[ $# -lt 2 ]]; then
