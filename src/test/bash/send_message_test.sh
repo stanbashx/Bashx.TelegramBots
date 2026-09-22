@@ -121,18 +121,15 @@ done
 
 #
 
-echo 'Not implemented!'; exit 1 # todo
-
 :> "${STDOUT}"
 :> "${STDERR}"
 TGBOTS_BOT_ID='12345678'
 TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
 TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
 TGBOTS_CHAT_ID='1'
-TGBOTS_MESSAGE=''
-TGBOTS_DST=''
 TGBOTS_TOPIC_ID=''
-"${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
+TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+ "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -t "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
 . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
 . $asserts/files/empty.sh "${STDOUT}"
 . $asserts/files/equals.sh "${STDERR}" 'No topic id!'$'\n'
@@ -145,16 +142,17 @@ for VALUE in "${VALUES[@]}"; do
  TGBOTS_BOT_SECRET="$(printf '%.1s' {1..35})"
  TGBOTS_BOT_SECRET_SRC='TGBOTS_BOT_SECRET'
  TGBOTS_CHAT_ID='1'
- TGBOTS_MESSAGE=''
- TGBOTS_DST=''
  TGBOTS_TOPIC_ID="${VALUE}"
- "${SCRIPT}" "${TGBOTS_BOT_ID}" "${TGBOTS_BOT_SECRET_SRC}" "${TGBOTS_CHAT_ID}" "${TGBOTS_MESSAGE}" "${TGBOTS_DST}" "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
+ TGBOTS_BOT_SECRET="${TGBOTS_BOT_SECRET}" \
+  "${SCRIPT}" -b "${TGBOTS_BOT_ID}" -bss "${TGBOTS_BOT_SECRET_SRC}" -c "${TGBOTS_CHAT_ID}" -t "${TGBOTS_TOPIC_ID}" > "${STDOUT}" 2> "${STDERR}"
  . $asserts/strings/eq.sh "${SCRIPT}" "$?" '1'
  . $asserts/files/empty.sh "${STDOUT}"
  . $asserts/files/equals.sh "${STDERR}" 'Wrong topic id!'$'\n'
 done
 
 #
+
+echo 'Not implemented!'; exit 1 # todo
 
 :> "${STDOUT}"
 :> "${STDERR}"
